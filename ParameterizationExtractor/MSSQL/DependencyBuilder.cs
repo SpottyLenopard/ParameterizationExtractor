@@ -85,7 +85,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                     var i = await insertTable(item.ReferencedTable, item.ParentColumn);
                     if (i != null)
                     {
-                        table.Parents.Add(i);
+                        table.Parents.Add(new PTableDependency() { PTable = i, FK = item });
                         result.Add(i);
                     }
                 }
@@ -94,7 +94,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                     var i = await insertTable(item.ParentTable, item.ReferencedColumn);
                     if (i != null)
                     {
-                        table.Childern.Add(i);
+                        table.Childern.Add(new PTableDependency() { PTable = i, FK = item });
                         result.Add(i);
                     }
                 }

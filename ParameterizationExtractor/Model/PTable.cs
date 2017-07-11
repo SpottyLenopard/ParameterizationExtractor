@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 
 namespace Quipu.ParameterizationExtractor.Model
 {
+    public class PTableDependency
+    {
+        public PTable PTable { get; set; }
+        public PDependentTable FK { get; set; }
+    }
+
     public class PTable : List<PField>
     {
         private readonly PTableMetadata _metaData;
@@ -34,14 +40,14 @@ namespace Quipu.ParameterizationExtractor.Model
                                   on f.FieldName equals v
                             select f).ToList();
     
-            _parents = new List<PTable>();
-            _children = new List<PTable>();
+            _parents = new List<PTableDependency>();
+            _children = new List<PTableDependency>();
         }
 
-        private readonly IList<PTable> _parents;
-        private readonly IList<PTable> _children;
-        public IList<PTable> Childern { get { return _children; } }
-        public IList<PTable> Parents { get { return _parents; } }
+        private readonly IList<PTableDependency> _parents;
+        private readonly IList<PTableDependency> _children;
+        public IList<PTableDependency> Childern { get { return _children; } }
+        public IList<PTableDependency> Parents { get { return _parents; } }
         public IList<PField> UniqueFields { get; private set; }
         public string PK { get { return PkField?.Value.ToString(); } }
         public PField PkField { get; private set; }
@@ -81,7 +87,7 @@ namespace Quipu.ParameterizationExtractor.Model
 
             if (list.Any())
             {
-                return string.Format("where {0}", string.Join(" ", list.Select(_ => string.Format("{0} = {1}", _.FieldName, _.ValueToSqlString()))));
+                return string.Format("where {0}", string.Join(" ", list.Select(_ => string.Format("[{0}] = {1}", _.FieldName, _.ValueToSqlString()))));
             }
 
             return s;
@@ -107,15 +113,25 @@ namespace Quipu.ParameterizationExtractor.Model
         public PFieldMetadata MetaData { get { return _metaData; } }
         public string FieldName { get; set; }
         public object Value { get; set; }
-
+        public string Expression { get; set; }
         public string ValueToSqlString()
         {
+            if (!string.IsNullOrEmpty(Expression))
+                return Expression;
+
             if (_metaData.FieldType == typeof(string))
             {
                 return string.Format("'{0}'", Value.ToString());
-            } else if (_metaData.FieldType == typeof(bool))
+            }
+            else if (_metaData.FieldType == typeof(bool))
             {
                 return Value.ToString() == bool.TrueString ? "1" : "0";
+            }
+            else if (_metaData.FieldType == typeof(DateTime))
+            {
+                var date = Convert.ToDateTime(Value);
+
+                return string.Format("'{0}'", date.ToString("yyyy-MM-dd HH:mm:ss.fff"));
             }
             else
                 return Value.ToString();

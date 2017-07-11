@@ -14,6 +14,22 @@ namespace Quipu.ParameterizationExtractor.Common
             return table.Where(_ => !_.MetaData.IsIdentity).ToList();
         }
 
+        public static IEnumerable<PField> InjectSqlVariable(IEnumerable<PField> fields, string sqlVar, string fieldName)
+        {
+            var copy = new List<PField>(fields);
+            var f = copy.FirstOrDefault(_ => _.FieldName == fieldName);
+
+            if (f != null)
+                f.Expression = sqlVar;
+
+            return copy;
+        }
+
+        public static IEnumerable<PField> PrepareFieldsForChild(PTable child, string sqlVar, PDependentTable fk)
+        {
+            return InjectSqlVariable(NotIdentityFields(child), sqlVar, fk.ReferencedColumn);
+        }
+
         public static string IfExistsSql(PTable table)
         {
             var fields = NotIdentityFields(table);
@@ -31,5 +47,31 @@ namespace Quipu.ParameterizationExtractor.Common
 
             return sql.ToString();
         }
+        public static bool IsNumericType(this object o)
+        {
+            return o.GetType().IsNumericType();
+        }
+        public static bool IsNumericType(this Type o)
+        {
+            switch (Type.GetTypeCode(o))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
+
+
 }

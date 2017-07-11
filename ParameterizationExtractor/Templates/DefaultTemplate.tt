@@ -22,7 +22,6 @@ begin tran
 <# foreach(var item in items) 
 {	
 	ProcessRelation(item, item.Childern);
-
 }
 #>
 
@@ -40,44 +39,51 @@ END CATCH
 
 
 <#+  	
-	void InsertValues(IEnumerable<PField> fields)
+	void InsertValues(IEnumerable<PField> fields, string tableName)
 	{
+
 	#>
-		insert into(<#+ Write(string.Join(",",fields.Select(_=>_.FieldName))); #>)
-			values (<#+ Write(string.Join(",",fields.Select(_=>_.ValueToSqlString()))); #>)
+	insert into <#+Write(tableName);#> (<#+Write(string.Join(",",fields.Select(_=>string.Format("[{0}]",_.FieldName))));#>)
+	values (<#+Write(string.Join(",",fields.Select(_=>_.ValueToSqlString())));#>)
 	<#+
 	}
 
 	void IfNotExists(PTable table)
 	{
 	#>
-		if not exists(select top 1 1 from <#+Write(string.Format("{0} {1}",table.TableName,table.GetUniqueSqlWhere()));#> )				
+	if not exists(select top 1 1 from <#+Write(string.Format("{0} {1}",table.TableName,table.GetUniqueSqlWhere()));#> )				
 	<#+
 	}
 #>
 <#+  	
-    void ProcessRelation(PTable parent, IEnumerable<PTable> children)  
+	void ProcessRelation(PTable parent, IEnumerable<PTableDependency> children)  
     {  
 		//this.Write(SqlHelper.IfExistsSql(parent));
-		IfNotExists(parent);
+IfNotExists(parent);
 		var fields = SqlHelper.NotIdentityFields(parent);
 		#>
-		Begin
-			<#+ InsertValues(fields); #>
+	Begin
+		declare <#+ Write(string.Format("{0} {1}",parent.GetPKVarName(), parent.PkField.MetaData.SqlType));#>
+		<#+InsertValues(fields,parent.TableName); #>
 			<#+ if (parent.PkField.MetaData.IsIdentity) 
-				{#>
-					declare <#+ Write(string.Format("{0} {1}",parent.GetPKVarName(), parent.PkField.MetaData.SqlType));#> 
-					set <#+ Write(parent.GetPKVarName());#> = SCOPE_IDENTITY()  
-			<#+ } #>
+				{#>					 
+		set <#+ Write(parent.GetPKVarName());#> = SCOPE_IDENTITY()  
+			<#+ } 
+				else if (parent.PkField.MetaData.FieldType.IsNumericType() )
+				{ #>
+					select <#+Write(parent.GetPKVarName());#> = max(<#+Write(parent.PkField.FieldName);#>)+1 
+					from <#+Write(parent.TableName);#>
+				<#+}
+			#>				
 			<#+ 
 				foreach(var child in children)
 				{
-					var childFields = SqlHelper.NotIdentityFields(child);
-					IfNotExists(child);
-					InsertValues(childFields);
+					var childFields = SqlHelper.PrepareFieldsForChild(child.PTable, parent.GetPKVarName() , child.FK);
+					//IfNotExists(child);
+					InsertValues(childFields,child.PTable.TableName);
 				}
 			#>
-		End
+	End
 		<#+
     }  
 #>
