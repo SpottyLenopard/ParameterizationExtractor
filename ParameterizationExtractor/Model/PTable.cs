@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace Quipu.ParameterizationExtractor.Model
         public PDependentTable FK { get; set; }
     }
 
+    [DebuggerDisplay("{TableName} {Count}")]
     public class PTable : List<PField>
     {
         private readonly PTableMetadata _metaData;
@@ -95,10 +97,11 @@ namespace Quipu.ParameterizationExtractor.Model
 
         public string GetPKVarName()
         {
-            return string.Format("@{0}_{1}_{2}", TableName, PK, PkField?.Value);
+            return string.Format("@{0}_{1}_{2}", TableName, PkField?.FieldName, PK);
         }
     }
 
+    [DebuggerDisplay("{FieldName}")]
     public class PField
     {
         private readonly PFieldMetadata _metaData;

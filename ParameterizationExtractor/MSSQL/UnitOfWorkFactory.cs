@@ -11,7 +11,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
     {
         public IUnitOfWork GetUnitOfWork()
         {
-            return new UnitOfWork("Server=dev3-kiev;Database=CWNET;Integrated Security=True;MultipleActiveResultSets=true;Pooling=True;Max Pool Size=2500");
+            return new UnitOfWork("");
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                 {                                       
                     processedTables.Add(record);
 
-                    foreach (var item in await GetRelatedTables(record))
+                    foreach (var item in await GetRelatedTables(record,_=>!template.Exceptions.ContainsKey(_)))
                     {                        
                         if (!template.Exceptions.Any(_ => _.Key == item.TableName))
                             stack.Push(item);
@@ -54,11 +54,11 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return processedTables.Where(_ => _.IsStartingPoint).ToList();
         }
 
-        private async Task<IEnumerable<PTable>> GetRelatedTables(PTable table)
+        private async Task<IEnumerable<PTable>> GetRelatedTables(PTable table, Func<string, bool> checkRecord)
         {
             var result = new List<PTable>();
 
-            if (!_schema.DependentTables.Any(_ => _.ParentTable == table.TableName))
+            if (!table.IsStartingPoint && !_schema.DependentTables.Any(_ => _.ParentTable == table.TableName))
                 return result;
 
             var tables = _schema.DependentTables.Where(_ => _.ParentTable == table.TableName)                         
@@ -70,10 +70,13 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                 Func<string, string, Task<PTable>> insertTable = async (tableName, columnName) =>
                 {
+                    if (!checkRecord(tableName))
+                        return await Task.FromResult<PTable>(null);
+
                     var value = table.FirstOrDefault(_ => _.FieldName == columnName)?.ValueToSqlString();
                     if (value != null)
                     {
-                        var str = string.Format("where {0} = {1}", item.ReferencedColumn, value);
+                        var str = string.Format("where {0} = {1}", columnName, value);
                         return await GetPTable(tableName, str);
                     }
 

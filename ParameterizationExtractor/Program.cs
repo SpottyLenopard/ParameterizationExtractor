@@ -29,7 +29,8 @@ namespace ParameterizationExtractor
         static async Task MainAsync()
         {
             var pckg = new PackageTemplate();
-            pckg.RootRecords.Add("ServiceJobSchedules", "where ServiceJobScheduleId = 789792");
+            //pckg.RootRecords.Add("ServiceJobSchedules", "where ServiceJobScheduleId = 789792");
+            pckg.RootRecords.Add("ServiceJobs", "where ServiceJobId = 789800");
             pckg.Exceptions.Add("Users", null);
             pckg.Exceptions.Add("ServiceJobItemRelationLog", null);
             pckg.Exceptions.Add("ServiceJobLog", null);
