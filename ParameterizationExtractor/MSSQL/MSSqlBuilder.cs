@@ -11,7 +11,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 {
     public class MSSqlBuilder : ISqlBuilder
     {
-        public string Build(IEnumerable<PTable> tables)
+        public string Build(IEnumerable<PRecord> tables)
         {
             var template = new DefaultTemplate();
             template.Session = new Dictionary<string, object>();

@@ -9,7 +9,7 @@ namespace Quipu.ParameterizationExtractor.Common
 {
     public static class SqlHelper
     {
-        public static IEnumerable<PField> NotIdentityFields(PTable table)
+        public static IEnumerable<PField> NotIdentityFields(PRecord table)
         {
             return table.Where(_ => !_.MetaData.IsIdentity).ToList();
         }
@@ -25,12 +25,12 @@ namespace Quipu.ParameterizationExtractor.Common
             return copy;
         }
 
-        public static IEnumerable<PField> PrepareFieldsForChild(PTable child, string sqlVar, PDependentTable fk)
+        public static IEnumerable<PField> PrepareFieldsForChild(PRecord child, string sqlVar, PDependentTable fk)
         {
             return InjectSqlVariable(NotIdentityFields(child), sqlVar, fk.ReferencedColumn);
         }
 
-        public static string IfExistsSql(PTable table)
+        public static string IfExistsSql(PRecord table)
         {
             var fields = NotIdentityFields(table);
 

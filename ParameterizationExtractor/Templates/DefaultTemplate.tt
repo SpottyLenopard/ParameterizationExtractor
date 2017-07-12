@@ -18,7 +18,7 @@ begin try
 begin tran
 
 
-<# var items = this.Session["source"] as IEnumerable<PTable>; #>
+<# var items = this.Session["source"] as IEnumerable<PRecord>; #>
 <# foreach(var item in items) 
 {	
 	Process(item);
@@ -39,7 +39,7 @@ END CATCH
 
 
 <#+  	
-	PTable Process(PTable table)
+	PRecord Process(PRecord table)
 	{
 		if (table == null)
 			return null;
@@ -47,7 +47,7 @@ END CATCH
 		ProcessRelation(table, table.Childern);
 		foreach(var relatedItem in table.Childern.Union(table.Parents))
 		{			
-			return Process(relatedItem.PTable);
+			return Process(relatedItem.PRecord);
 		}
 
 		return null;
@@ -62,7 +62,7 @@ END CATCH
 	<#+
 	}
 
-	void IfNotExists(PTable table)
+	void IfNotExists(PRecord table)
 	{
 	if (table.UniqueFields != null && table.UniqueFields.Any())
 		{
@@ -73,7 +73,7 @@ END CATCH
 	}
 #>
 <#+  	
-	void ProcessRelation(PTable parent, IEnumerable<PTableDependency> children)  
+	void ProcessRelation(PRecord parent, IEnumerable<PTableDependency> children)  
     {  
 IfNotExists(parent);
 		var fields = SqlHelper.NotIdentityFields(parent);
@@ -96,9 +96,9 @@ IfNotExists(parent);
 			<#+}				
 		foreach(var child in children)
 			{
-				var childFields = SqlHelper.PrepareFieldsForChild(child.PTable, parent.GetPKVarName() , child.FK);
+				var childFields = SqlHelper.PrepareFieldsForChild(child.PRecord, parent.GetPKVarName() , child.FK);
 				//IfNotExists(child);
-				InsertValues(childFields,child.PTable.TableName);
+				InsertValues(childFields,child.PRecord.TableName);
 			}
 			#>
 	End

@@ -9,19 +9,23 @@ namespace Quipu.ParameterizationExtractor.Model
 {
     public class PackageTemplate : IPackageTemplate
     {
-        private readonly IDictionary<string, UniqueColumnsCollection> _exceptions = new Dictionary<string, UniqueColumnsCollection>();
+        private readonly IDictionary<string, UniqueColumnsCollection> _uniqueColums = new Dictionary<string, UniqueColumnsCollection>();
         private readonly IDictionary<string, string> _rootRecords = new Dictionary<string, string>();
+        private readonly IList<string> _exceptions = new List<string>();
+
         public PackageTemplate()
         {
 
         }
-        public IDictionary<string, UniqueColumnsCollection> Exceptions
+        public IDictionary<string, UniqueColumnsCollection> UniqueColums
         {
             get
             {
-                return _exceptions;
+                return _uniqueColums;
             }
         }
+
+        public IList<string> Exceptions { get { return _exceptions; } }
 
         public IDictionary<string, string> RootRecords
         {

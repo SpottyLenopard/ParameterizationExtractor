@@ -31,12 +31,14 @@ namespace ParameterizationExtractor
             var pckg = new PackageTemplate();
             //pckg.RootRecords.Add("ServiceJobSchedules", "where ServiceJobScheduleId = 789792");
             pckg.RootRecords.Add("ServiceJobs", "where ServiceJobId = 789800");
-            pckg.Exceptions.Add("Users", null);
-            pckg.Exceptions.Add("ServiceJobItemRelationLog", null);
-            pckg.Exceptions.Add("ServiceJobLog", null);
-            pckg.Exceptions.Add("ServiceJobItemLog", null);
-            pckg.Exceptions.Add("ApplicationServers", null);
-            pckg.Exceptions.Add("ServiceJobSchedulesDependencies", null);
+            //pckg.UniqueColums.Add("BusinessProcessSteps", new UniqueColumnsCollection() { "BPTypeCode", "StepStartStatusId", "StepEndStatusId" });
+           // pckg.RootRecords.Add("BusinessProcessSteps", "where bpstepid = 3138");
+            pckg.Exceptions.Add("Users");
+            pckg.Exceptions.Add("ServiceJobItemRelationLog");
+            pckg.Exceptions.Add("ServiceJobLog");
+            pckg.Exceptions.Add("ServiceJobItemLog");
+            pckg.Exceptions.Add("ApplicationServers");
+            pckg.Exceptions.Add("ServiceJobSchedulesDependencies");
             //"ServiceJobItemRelationLog" "ServiceJobLog" "ServiceJobItemRelationLog"
             var DependentTables = GetDependentTables();
             var MetaData = GetMetaData(new MetaDataInitializer());

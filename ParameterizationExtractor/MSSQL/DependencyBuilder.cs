@@ -20,10 +20,10 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             _log = log;
         }
 
-        public async Task<IEnumerable<PTable>> PrepareAsync(IPackageTemplate template)
+        public async Task<IEnumerable<PRecord>> PrepareAsync(IPackageTemplate template)
         {
-            var processedTables = new HashSet<PTable>();
-            var stack = new Stack<PTable>();
+            var processedTables = new HashSet<PRecord>();
+            var stack = new Stack<PRecord>();
 
             foreach (var root in template.RootRecords)
             {
@@ -41,9 +41,9 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                 {                                       
                     processedTables.Add(record);
 
-                    foreach (var item in await GetRelatedTables(record,_=>!template.Exceptions.ContainsKey(_)))
+                    foreach (var item in await GetRelatedTables(record,_=>!template.Exceptions.Contains(_)))
                     {                        
-                        if (!template.Exceptions.Any(_ => _.Key == item.TableName))
+                        if (!template.Exceptions.Any(_ => _ == item.TableName))
                             stack.Push(item);
                     }
 
@@ -54,9 +54,9 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return processedTables.Where(_ => _.IsStartingPoint).ToList();
         }
 
-        private async Task<IEnumerable<PTable>> GetRelatedTables(PTable table, Func<string, bool> checkRecord)
+        private async Task<IEnumerable<PRecord>> GetRelatedTables(PRecord table, Func<string, bool> checkRecord)
         {
-            var result = new List<PTable>();
+            var result = new List<PRecord>();
 
             if (!table.IsStartingPoint && !_schema.DependentTables.Any(_ => _.ParentTable == table.TableName))
                 return result;
@@ -68,36 +68,36 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             {
                 _log.DebugFormat("parent table: {0} referenced table {1}", item.ParentTable, item.ReferencedTable);
 
-                Func<string, string, Task<PTable>> insertTable = async (tableName, columnName) =>
+                Func<string, string, string, Task<PRecord>> insertTable = async (tableName, columnName, pkColumn) =>
                 {
                     if (!checkRecord(tableName))
-                        return await Task.FromResult<PTable>(null);
+                        return await Task.FromResult<PRecord>(null);
 
                     var value = table.FirstOrDefault(_ => _.FieldName == columnName)?.ValueToSqlString();
                     if (value != null)
                     {
-                        var str = string.Format("where {0} = {1}", columnName, value);
+                        var str = string.Format("where {0} = {1}", pkColumn, value);
                         return await GetPTable(tableName, str);
                     }
 
-                    return await Task.FromResult<PTable>(null);
+                    return await Task.FromResult<PRecord>(null);
                 };
 
                 if (item.ParentTable == table.TableName)
                 {
-                    var i = await insertTable(item.ReferencedTable, item.ParentColumn);
+                    var i = await insertTable(item.ReferencedTable, item.ParentColumn, item.ReferencedColumn);
                     if (i != null)
                     {
-                        table.Parents.Add(new PTableDependency() { PTable = i, FK = item });
+                        table.Parents.Add(new PTableDependency() { PRecord = i, FK = item });
                         result.Add(i);
                     }
                 }
                 else
                 {
-                    var i = await insertTable(item.ParentTable, item.ReferencedColumn);
+                    var i = await insertTable(item.ParentTable, item.ReferencedColumn, item.ParentColumn);
                     if (i != null)
                     {
-                        table.Childern.Add(new PTableDependency() { PTable = i, FK = item });
+                        table.Childern.Add(new PTableDependency() { PRecord = i, FK = item });
                         result.Add(i);
                     }
                 }
@@ -106,9 +106,9 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return result;
         }
       
-        public async Task<PTable> GetPTable(string tableName, string where)
+        public async Task<PRecord> GetPTable(string tableName, string where)
         {
-            var result = new List<PTable>();
+            var result = new List<PRecord>();
 
             var stringBuilder = new StringBuilder();
 
@@ -124,7 +124,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                 while(reader.Read())
                 {
-                    result.Add(new PTable(reader, _schema.Tables.First(_ => _.TableName == tableName)) { Source = stringBuilder.ToString().Trim() });
+                    result.Add(new PRecord(reader, _schema.Tables.First(_ => _.TableName == tableName)) { Source = stringBuilder.ToString().Trim() });
                 }
             }
 

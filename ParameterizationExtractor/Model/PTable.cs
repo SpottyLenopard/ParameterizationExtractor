@@ -11,15 +11,15 @@ namespace Quipu.ParameterizationExtractor.Model
 {
     public class PTableDependency
     {
-        public PTable PTable { get; set; }
+        public PRecord PRecord { get; set; }
         public PDependentTable FK { get; set; }
     }
 
     [DebuggerDisplay("{TableName} {Count}")]
-    public class PTable : List<PField>
+    public class PRecord : List<PField>
     {
         private readonly PTableMetadata _metaData;
-        public PTable(IDataRecord dataRow, PTableMetadata metaData)
+        public PRecord(IDataRecord dataRow, PTableMetadata metaData)
         {
             _metaData = metaData;
 
@@ -59,7 +59,7 @@ namespace Quipu.ParameterizationExtractor.Model
         public string Source { get; set; }
         public override bool Equals(object obj)
         {
-            var p = obj as PTable;
+            var p = obj as PRecord;
             if (p != null)
                 return p.Source.Trim() == this.Source.Trim();
 

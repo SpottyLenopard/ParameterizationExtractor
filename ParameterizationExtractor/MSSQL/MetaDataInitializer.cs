@@ -18,6 +18,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             sqlToNetTypes.Add("int", typeof(int));
             sqlToNetTypes.Add("bigint", typeof(long));
             sqlToNetTypes.Add("varchar", typeof(string));
+            sqlToNetTypes.Add("char", typeof(string));
             sqlToNetTypes.Add("nvarchar", typeof(string));
             sqlToNetTypes.Add("datetime", typeof(DateTime));
             sqlToNetTypes.Add("bit", typeof(bool));
