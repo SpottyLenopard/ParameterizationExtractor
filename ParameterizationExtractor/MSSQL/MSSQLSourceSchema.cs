@@ -31,24 +31,66 @@ INNER JOIN
 
         public static string sqlPKColumns = @"
 select
-  i.name                                as IndexName
-, object_name(ic.OBJECT_ID)             as TableName
-, col_name(ic.OBJECT_ID ,ic.column_id)  as ColumnName
-, c.is_identity                         as IsIdentity 
-from
-sys.indexes                             as i
-inner join sys.index_columns            as ic on i.OBJECT_ID = ic.OBJECT_ID
- and i.index_id = ic.index_id
-inner join sys.[columns] c on c.[object_id] = ic.[object_id] and c.column_id = ic.column_id
-where
- i.is_primary_key = 1
-order by object_name(ic.OBJECT_ID)
+  C.[object_id]
+, object_name(C.[object_id])             as TableName
+, C.column_id
+, C.is_identity as IsIdentity 
+, C.is_computed as IsComputed 
+, C.[name] as ColumnName
+, T.[name] as TypeName
+, TBase.[name] as BaseTypeName
+, TBase.[name]+ case
+  when (TBase.user_type_id in (165, 167, 173, 175, 231, 239)) then
+   case
+       when C.max_length = -1 then '(max)'
+       else '('+
+     case
+         when T.system_type_id in (231, 239) then cast(C.max_length/2 as nvarchar(max))
+         else cast(C.max_length as nvarchar(max))
+     end
+       +')'
+       --else '('+cast(T.max_length as nvarchar(max))+')'
+   end
+  /*165-varbinary; 167-varchar; 173-binary; 175-char, 231-nvarchar; 239-nchar*/
+  when (TBase.user_type_id in (106, 108))
+   then '('+cast(C.[precision] as nvarchar(max))+','+cast(C.scale as nvarchar(max))+')'
+  /*106-decimal; numeric-108*/
+  else ''
+     end
+   as base_type_name_str
+, case
+      when exists
+      (
+       select * from sys.indexes i
+       inner join sys.index_columns ic on ic.[object_id] = i.[object_id] and ic.index_id = i.index_id
+       where ic.[object_id] = C.[object_id]
+       and ic.column_id = C.column_id
+       and i.is_primary_key = 1
+      )
+      then cast(1 as bit)
+      else cast(0 as bit)
+  end as IsInPK
+from sys.[columns] C
+inner join sys.types T on T.system_type_id = C.system_type_id and T.user_type_id = C.user_type_id
+inner join sys.types TBase on T.system_type_id = TBase.system_type_id
+ and TBase.system_type_id = TBase.user_type_id
+where 
+--C.[object_id] = object_id('BusinessProcesses_Id')
+--C.[object_id] = object_id('LoanApplications')
+--C.[object_id] = object_id('f_rep_GetContractStatement_byAccountNumber') 
+ T.system_type_id not in (189, 240)
+/*189-timestamp;240-all CLR*/
+and C.is_computed = 0
+order by C.column_id
 ";
 
         private readonly IEnumerable<PDependentTable> _dependentTables;
         private readonly IEnumerable<PTableMetadata> _tables;
         public MSSQLSourceSchema(IEnumerable<PDependentTable> dependentTables, IEnumerable<PTableMetadata> tables)
         {
+            Affirm.ArgumentNotNull(dependentTables, "dependentTables");
+            Affirm.ArgumentNotNull(tables, "tables");
+
             _tables = tables;
             _dependentTables = dependentTables;            
         }
@@ -67,6 +109,11 @@ order by object_name(ic.OBJECT_ID)
             {
                 return _tables;
             }
+        }
+
+        public PTableMetadata GetTableMetaData(string tableName)
+        {
+            return Tables.First(_ => _.TableName == tableName);
         }
     }
 }

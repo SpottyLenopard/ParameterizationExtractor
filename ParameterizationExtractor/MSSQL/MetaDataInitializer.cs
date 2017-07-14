@@ -42,17 +42,15 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             }
         }
 
-        public PFieldMetadata InitTableMetaData(DataRow metaData, IList<DataRow> indexesMetaData)
-        {
-            var pkField = indexesMetaData?.FirstOrDefault(_ => _["ColumnName"].ToString() == metaData["column_name"].ToString());
-
+        public PFieldMetadata InitTableMetaData(DataRow metaData)
+        {           
             var result = new PFieldMetadata()
             {
-                FieldName = metaData["column_name"].ToString(),
-                FieldType = GetNETType(metaData["data_type"].ToString()),
-                SqlType = metaData["data_type"].ToString(),
-                IsPK = pkField != null,
-                IsIdentity = pkField != null && bool.Parse(pkField["IsIdentity"].ToString())
+                FieldName = metaData["ColumnName"].ToString(),
+                FieldType = GetNETType(metaData["BaseTypeName"].ToString()),
+                SqlType = metaData["base_type_name_str"].ToString(),
+                IsPK = bool.Parse(metaData["IsInPK"].ToString()),
+                IsIdentity = bool.Parse(metaData["IsIdentity"].ToString())
             };
 
             return result;

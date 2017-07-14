@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,16 @@ namespace Quipu.ParameterizationExtractor.Model
         public PTableMetadata()
         {
             UniqueColumnsCollection = new UniqueColumnsCollection();
+        }
+
+        private PFieldMetadata _pk;
+        public PFieldMetadata PK
+        {
+            get {
+                _pk = _pk ?? this.First(_ => _.IsPK);
+
+                return _pk;
+            }
         }
         public string TableName { get; set; }
         public UniqueColumnsCollection UniqueColumnsCollection { get; set; }
@@ -49,7 +60,7 @@ namespace Quipu.ParameterizationExtractor.Model
             return base.GetHashCode();
         }
     }
-
+    [DebuggerDisplay("{ParentTable}-{ReferencedTable}-{ParentColumn}-{ReferencedColumn}")]
     public class PDependentTable
     {
         public string Name { get; set; } 

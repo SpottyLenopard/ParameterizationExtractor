@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Quipu.ParameterizationExtractor.Common;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -9,13 +10,14 @@ using System.Threading.Tasks;
 
 namespace Quipu.ParameterizationExtractor.Model
 {
+    [DebuggerDisplay("{PRecord.TableName} {FK.ParentTable}-{FK.ReferencedTable}")]
     public class PTableDependency
     {
         public PRecord PRecord { get; set; }
         public PDependentTable FK { get; set; }
     }
 
-    [DebuggerDisplay("{TableName} {Count}")]
+    [DebuggerDisplay("{TableName} {PK}")]
     public class PRecord : List<PField>
     {
         private readonly PTableMetadata _metaData;
@@ -61,7 +63,7 @@ namespace Quipu.ParameterizationExtractor.Model
         {
             var p = obj as PRecord;
             if (p != null)
-                return p.Source.Trim() == this.Source.Trim();
+                return p.ToString() == this.ToString();
 
             return base.Equals(obj);
         }
@@ -73,7 +75,7 @@ namespace Quipu.ParameterizationExtractor.Model
 
         public override string ToString()
         {
-            return TableName;
+            return string.Format("{0} {1}",TableName,PK);
         }        
 
         public string GetUniqueSqlWhere()
@@ -89,7 +91,7 @@ namespace Quipu.ParameterizationExtractor.Model
 
             if (list.Any())
             {
-                return string.Format("where {0}", string.Join(" ", list.Select(_ => string.Format("[{0}] = {1}", _.FieldName, _.ValueToSqlString()))));
+                return string.Format("where {0}", SqlHelper.GetNameValueString(list));
             }
 
             return s;

@@ -10,6 +10,6 @@ namespace Quipu.ParameterizationExtractor.Interfaces
 {
     public interface IMetaDataInitializer
     {
-        PFieldMetadata InitTableMetaData(DataRow metaData, IList<DataRow> indexesMetaData);
+        PFieldMetadata InitTableMetaData(DataRow metaData);
     }
 }

@@ -14,13 +14,14 @@ namespace Quipu.ParameterizationExtractor.Interfaces
 
     public interface IPackageTemplate
     {
-        IDictionary<string,string> RootRecords { get; }
-        IList<string> Exceptions { get; }
-        IDictionary<string, UniqueColumnsCollection> UniqueColums { get; }
+        IList<RecordToExtract> RootRecords { get; }
+        IList<string> Exceptions { get; }                
+        IList<TableToExtract> TablesToProcess { get; }
     }
 
     public interface IExtractConfiguration
     {
-        
+        IList<string> FieldsToExclude { get; }
+        IDictionary<string, UniqueColumnsCollection> UniqueColums { get; }
     }
 }

@@ -11,23 +11,27 @@ namespace Quipu.ParameterizationExtractor.Common
     {
         public static IEnumerable<PField> NotIdentityFields(PRecord table)
         {
-            return table.Where(_ => !_.MetaData.IsIdentity).ToList();
+            return table.Where(_ => !_.MetaData.IsIdentity);
         }
 
         public static IEnumerable<PField> InjectSqlVariable(IEnumerable<PField> fields, string sqlVar, string fieldName)
-        {
-            var copy = new List<PField>(fields);
-            var f = copy.FirstOrDefault(_ => _.FieldName == fieldName);
+        {         
+            var f = fields.FirstOrDefault(_ => _.FieldName == fieldName);
 
             if (f != null)
                 f.Expression = sqlVar;
 
-            return copy;
+            return fields;
         }
 
         public static IEnumerable<PField> PrepareFieldsForChild(PRecord child, string sqlVar, PDependentTable fk)
         {
-            return InjectSqlVariable(NotIdentityFields(child), sqlVar, fk.ReferencedColumn);
+            return InjectSqlVariable(NotIdentityFields(child), sqlVar, child.TableName == fk.ParentTable ? fk.ParentColumn : fk.ReferencedColumn);
+        }
+
+        public static string GetNameValueString(IEnumerable<PField> fields)
+        {
+            return string.Join(" and ", fields.Select(_ => string.Format("[{0}] = {1}", _.FieldName, _.ValueToSqlString())));
         }
 
         public static string IfExistsSql(PRecord table)

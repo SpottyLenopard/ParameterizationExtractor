@@ -19,10 +19,18 @@ begin tran
 
 
 <# var items = this.Session["source"] as IEnumerable<PRecord>; #>
-<# foreach(var item in items) 
-{	
-	Process(item);
-}
+<# 	
+foreach (var record in items)
+            {
+				IfNotExists(record);
+#>
+	Begin
+<#
+				ProcessOne(record, null, null);
+#>
+	End
+<#
+            }
 #>
 
 
@@ -39,69 +47,93 @@ END CATCH
 
 
 <#+  	
-	PRecord Process(PRecord table)
-	{
-		if (table == null)
-			return null;
+	private readonly IList<PRecord> ProcessedItems = new List<PRecord>();
 
-		ProcessRelation(table, table.Childern);
-		foreach(var relatedItem in table.Childern.Union(table.Parents))
-		{			
-			return Process(relatedItem.PRecord);
+	void ProcessOne (PRecord item, PRecord parentRecord, PDependentTable FK )
+	{
+		if (item.Parents.Any())
+		{
+			foreach(var parent in item.Parents)
+			{
+				if (!ProcessedItems.Any(_=>_.Equals(parent.PRecord)))
+				{#>
+	<#+IfNotExists(parent.PRecord);
+#>
+		Begin
+<#+
+					if (GenerateSql(parent.PRecord))
+						SqlHelper.PrepareFieldsForChild(item, parent.PRecord.GetPKVarName(), parent.FK);
+#>
+		End
+<#+
+				}
+			}
 		}
 
-		return null;
+		if (parentRecord != null && FK != null)
+			SqlHelper.PrepareFieldsForChild(item, parentRecord.GetPKVarName(), FK);
+
+
+		GenerateSql(item);
+
+		foreach (var child in item.Childern)
+		{
+            ProcessOne(child.PRecord, item, child.FK);
+			Write("\n");
+		}
 	}
 
 	void InsertValues(IEnumerable<PField> fields, string tableName)
 	{
+#>
+		insert into <#+Write(tableName);#> (<#+Write(string.Join(",",fields.Select(_=>string.Format("[{0}]",_.FieldName))));#>)
+		values (<#+Write(string.Join(",",fields.Select(_=>_.ValueToSqlString())));#>)
 
-	#>
-	insert into <#+Write(tableName);#> (<#+Write(string.Join(",",fields.Select(_=>string.Format("[{0}]",_.FieldName))));#>)
-	values (<#+Write(string.Join(",",fields.Select(_=>_.ValueToSqlString())));#>)
-	<#+
+<#+
 	}
 
 	void IfNotExists(PRecord table)
 	{
-	if (table.UniqueFields != null && table.UniqueFields.Any())
+	if (table.UniqueFields != null && table.UniqueFields.Any() || table.PkField != null && !table.PkField.MetaData.FieldType.IsNumericType())
 		{
-	#>
+#>
 	if not exists(select top 1 1 from <#+Write(string.Format("{0} {1}",table.TableName,table.GetUniqueSqlWhere()));#> )				
-		<#+}
+<#+}
 		// could be that we need to throw exception here.		
 	}
 #>
 <#+  	
-	void ProcessRelation(PRecord parent, IEnumerable<PTableDependency> children)  
-    {  
-IfNotExists(parent);
-		var fields = SqlHelper.NotIdentityFields(parent);
-		#>
-	Begin
+	bool GenerateSql(PRecord parent)
+	{
+		if (ProcessedItems.Any(_=>_.Equals(parent)))
+			return false;
 
-
-		declare <#+ Write(string.Format("{0} {1}",parent.GetPKVarName(), parent.PkField.MetaData.SqlType));
+		var fields = SqlHelper.NotIdentityFields(parent);#>
+		declare <#+ Write(string.Format("{0} {1}\n",parent.GetPKVarName(), parent.PkField.MetaData.SqlType));#>
+<#+
 			if (!parent.PkField.MetaData.IsIdentity
 					&& parent.PkField.MetaData.FieldType.IsNumericType()) 
-		{#>
+		{
+#>
 		select <#+Write(parent.GetPKVarName());#> = max(<#+Write(parent.PkField.FieldName);#>)+1 
-		from <#+Write(parent.TableName);#>
-		<#+InsertValues(SqlHelper.InjectSqlVariable(fields,parent.GetPKVarName(),parent.PkField.FieldName),parent.TableName);
+		from <#+Write(parent.TableName);
+#>
+<#+InsertValues(SqlHelper.InjectSqlVariable(fields,parent.GetPKVarName(),parent.PkField.FieldName),parent.TableName);
 		}
 		else if (parent.PkField.MetaData.IsIdentity)
 			{
-			InsertValues(fields,parent.TableName); #>
-			set <#+ Write(parent.GetPKVarName());#> = SCOPE_IDENTITY()  
-			<#+}				
-		foreach(var child in children)
-			{
-				var childFields = SqlHelper.PrepareFieldsForChild(child.PRecord, parent.GetPKVarName() , child.FK);
-				//IfNotExists(child);
-				InsertValues(childFields,child.PRecord.TableName);
+			InsertValues(fields,parent.TableName); 
+#>
+		set <#+ Write(parent.GetPKVarName());#> = SCOPE_IDENTITY()
+<#+  
 			}
-			#>
-	End
-		<#+
-    }  
+			else
+			{
+				InsertValues(fields,parent.TableName);#>
+		set <#+ Write(parent.GetPKVarName());#> = <#+Write(parent.PkField.ValueToSqlString());
+			}
+	  Write("\n");
+	  ProcessedItems.Add(parent);
+	  return true;
+	}
 #>

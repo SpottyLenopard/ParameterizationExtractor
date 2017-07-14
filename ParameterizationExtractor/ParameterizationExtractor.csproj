@@ -48,7 +48,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\Affirm.cs" />
+    <Compile Include="Common\Exceptions.cs" />
+    <Compile Include="Common\Extensions.cs" />
     <Compile Include="Common\Logger.cs" />
+    <Compile Include="Common\SingletonBase.cs" />
     <Compile Include="Common\SqlHelper.cs" />
     <Compile Include="Interfaces\IDependencyBuilder.cs" />
     <Compile Include="Interfaces\ILog.cs" />
@@ -56,9 +60,12 @@
     <Compile Include="Interfaces\ISourceSchema.cs" />
     <Compile Include="Interfaces\ISqlBuilder.cs" />
     <Compile Include="Interfaces\IUnitOfWork.cs" />
+    <Compile Include="Model\ExtractStrategy.cs" />
+    <Compile Include="Model\GlobalExtractConfiguration.cs" />
     <Compile Include="Model\PackageTemplate.cs" />
     <Compile Include="Model\PMetadata.cs" />
     <Compile Include="Model\PTable.cs" />
+    <Compile Include="Model\RootRecord.cs" />
     <Compile Include="MSSQL\DependencyBuilder.cs" />
     <Compile Include="MSSQL\MetaDataInitializer.cs" />
     <Compile Include="MSSQL\MSSqlBuilder.cs" />
