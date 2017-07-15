@@ -98,7 +98,6 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                 Func<string, string, string, Task<IEnumerable<PRecord>>> insertTable = async (tableName, columnName, pkColumn) =>
                 {
-                    //if (template.Exceptions.Any(_ => _ == tableName))
                     if (!_template.TablesToProcess.Any(_ => _.TableName == tableName))
                         return await Task.FromResult<IEnumerable<PRecord>>(null);
 

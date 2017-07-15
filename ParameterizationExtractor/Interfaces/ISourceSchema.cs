@@ -12,5 +12,9 @@ namespace Quipu.ParameterizationExtractor.Interfaces
         IEnumerable<PTableMetadata> Tables { get; }
         IEnumerable<PDependentTable> DependentTables { get; }
         PTableMetadata GetTableMetaData(string tableName);
+        bool WasInit { get; }
+        Task Init();
+        string Database { get; }
+        string DataSource { get; }
     }
 }

@@ -18,6 +18,8 @@ namespace Quipu.ParameterizationExtractor.Interfaces
         Task<DataTable> GetSchemaAsync(string collectionName);
         Task<DataTable> GetSchemaAsync(string collectionName, string[] restrictionValues);       
         Task<SqlDataReader> ExecuteReaderAsync(string sql);
+        string Database { get; }
+        string DataSource { get; }
     }
 
     public interface IUnitOfWorkFactory

@@ -16,17 +16,10 @@ namespace ParameterizationExtractor
     public class Program
     {
         public static ILog _log;        
-        public static IUnitOfWorkFactory _uowFactory
-        {
-            get { return UnitOfWorkFactory.GetInstance(); }
-        }
-        public static GlobalExtractConfiguration GlobalConfiguration
-        {
-            get { return GlobalExtractConfiguration.GetInstance(); }
-        }
 
         static void FillConfigForDebug()
         {
+            var GlobalConfiguration = GlobalExtractConfiguration.GetInstance();
             GlobalConfiguration.DefaultExtractStrategy = new OnlyChildrenExtractStrategy();
             GlobalConfiguration.DefaultSqlBuildStrategy = new SqlBuildStrategy();
             GlobalConfiguration.FieldsToExclude.Add("CreatorId");
@@ -43,6 +36,7 @@ namespace ParameterizationExtractor
             GlobalConfiguration.UniqueColums.Add("sys_Parameters", new UniqueColumnsCollection() { "ParameterName" });
             GlobalConfiguration.UniqueColums.Add("Cls_PaymentMessageTypes", new UniqueColumnsCollection() { "Code" });
             GlobalConfiguration.UniqueColums.Add("PaymentMessageTypeFields", new UniqueColumnsCollection() { "Code" });
+            GlobalConfiguration.UniqueColums.Add("ServiceJobs", new UniqueColumnsCollection() { "Title", "Description" });
             GlobalConfiguration.UniqueColums.Add("ServiceJobItems", new UniqueColumnsCollection() { "MethodName", "ObjectAssemblyName", "ObjectTypeName" });
         }
 
@@ -50,7 +44,16 @@ namespace ParameterizationExtractor
         {
             _log = new ConsoleLogger();
             FillConfigForDebug();
-            MainAsync().Wait();
+            try
+            {
+                MainAsync()
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e);
+            }
            
             Console.ReadKey();
         }
@@ -137,7 +140,7 @@ namespace ParameterizationExtractor
             pckg.TablesToProcess.Add(new TableToExtract("ServiceJobSchedules", new OnlyChildrenExtractStrategy()));
             pckg.TablesToProcess.Add(new TableToExtract("ServiceJobItemRelations", new FKDependencyExtractStrategy()));
             pckg.TablesToProcess.Add(new TableToExtract("ServiceJobScheduleParameters", new OnlyOneTableExtractStrategy()));
-            pckg.TablesToProcess.Add(new TableToExtract("ServiceJobSchedulesDependencies", new OnlyOneTableExtractStrategy()));
+            //pckg.TablesToProcess.Add(new TableToExtract("ServiceJobSchedulesDependencies", new OnlyOneTableExtractStrategy()));
             
             return pckg;
         }
@@ -165,16 +168,14 @@ namespace ParameterizationExtractor
             };
 
             //"ServiceJobItemRelationLog" "ServiceJobLog" "ServiceJobItemRelationLog"
-            var DependentTables = GetDependentTables();
-            var MetaData = GetMetaData(new MetaDataInitializer());
 
-            await Task.WhenAll(DependentTables, MetaData);
+            var schema = new MSSQLSourceSchema(UnitOfWorkFactory.GetInstance(), GlobalConfiguration);
 
-            var schema = new MSSQLSourceSchema(DependentTables.Result, MetaData.Result);
+            await schema.Init();
 
             foreach (var pckg in pckgs)
             {
-                var builder = new DependencyBuilder(_uowFactory, schema, _log, pckg);
+                var builder = new DependencyBuilder(UnitOfWorkFactory.GetInstance(), schema, _log, pckg);
 
                 var pTables = await builder.PrepareAsync();
                 var sqlBuilder = new MSSqlBuilder();
@@ -182,7 +183,7 @@ namespace ParameterizationExtractor
                 if (!System.IO.Directory.Exists(".\\Output"))
                     System.IO.Directory.CreateDirectory(".\\Output");
 
-                FileService.GetInstance().Save(sqlBuilder.Build(pTables), string.Format(".\\Output\\{0}_p_{1}.sql", pckg.Order, pckg.PackageName));
+                FileService.GetInstance().Save(sqlBuilder.Build(pTables,schema), string.Format(".\\Output\\{0}_p_{1}.sql", pckg.Order, pckg.PackageName));
             }
             
             _log.Debug(string.Empty);
@@ -192,98 +193,7 @@ namespace ParameterizationExtractor
 
 
         }
-
-        static void Process(IEnumerable<PRecord> records)
-        {
-            if (records == null
-                || !records.Any())
-                return;
-
-            foreach (var record in records)
-            {
-                ProcessOne(record, null);
-            }
-        }
-
-        static void ProcessOne (PRecord item, PRecord parentRecord )
-        {
-            _log.DebugFormat("Item {0} ", item.ToString());
-            if (parentRecord != null)
-                SqlHelper.InjectSqlVariable(SqlHelper.NotIdentityFields(item), parentRecord.GetPKVarName(), parentRecord.PkField.FieldName);
-
-            foreach (var child in item.Childern.Select(_=>_.PRecord))
-                ProcessOne(child, item);
-        }
-     
-
-        private static async Task<IEnumerable<PDependentTable>> GetDependentTables()
-        {
-            var result = new List<PDependentTable>();
-
-            using (var uof = _uowFactory.GetUnitOfWork())
-            using (var dr = await uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlFKs))
-            {
-                var dt = new DataTable();
-                dt.Load(dr);
-
-                foreach (DataRow r in dt.Rows)
-                {
-                    var item = new PDependentTable
-                    {
-                        Name = r["Name"].ToString(),
-                        ParentColumn = r["ParentColumn"].ToString(),
-                        ParentTable = r["ParentTable"].ToString(),
-                        ReferencedColumn = r["ReferencedColumn"].ToString(),
-                        ReferencedTable = r["ReferencedTable"].ToString()
-                    };
-
-                    result.Add(item);
-                }
-            }
-
-            return result;
-        }
-
-        private static async Task<IEnumerable<PTableMetadata>> GetMetaData(IMetaDataInitializer initializer)
-        {
-            var result = new List<PTableMetadata>();
-
-            using (var uof = _uowFactory.GetUnitOfWork())
-            {
-                var metaTables = uof.GetSchemaAsync("Tables");
-
-                var metaColumns = uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlPKColumns);//uof.GetSchemaAsync("Columns");
-
-                //var indexes = uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlPKColumns);
-
-                await Task.WhenAll(metaColumns, metaTables);
-
-                var dt = new DataTable();
-                dt.Load(metaColumns.Result);
-
-                var iList = dt.Rows.Cast<DataRow>();
-
-                foreach (DataRow t in metaTables.Result.Rows)
-                {
-                    var pTab = new PTableMetadata() { TableName = t["table_name"].ToString() };
-
-                    foreach (DataRow c in iList.Where(_ => _["TableName"].ToString() == pTab.TableName
-                                                            && !GlobalConfiguration.FieldsToExclude.Any(f=>f == _["ColumnName"].ToString())))
-                    {
-                        var field = initializer.InitTableMetaData(c);
-                      
-                        pTab.Add(field);
-                       
-                    }
-                    UniqueColumnsCollection uniqueColumns = null;
-                    if (GlobalConfiguration.UniqueColums.TryGetValue(pTab.TableName,out uniqueColumns))
-                        pTab.UniqueColumnsCollection.AddRange(uniqueColumns);
-
-                    result.Add(pTab);
-                }
-            }
-
-            return result;
-        }
+    
+        
     }
 }

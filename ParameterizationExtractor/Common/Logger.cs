@@ -18,5 +18,15 @@ namespace Quipu.ParameterizationExtractor.Common
         {
             Console.WriteLine(message, arg);
         }
+
+        public void Error(Exception e)
+        {
+            var s = new StringBuilder();
+            while (e != null)
+            {
+                Console.WriteLine("Err message {0} Err Stack: {1}", e.Message, e.StackTrace);
+                e = e.InnerException;
+            }
+        }
     }
 }

@@ -10,5 +10,6 @@ namespace Quipu.ParameterizationExtractor.Interfaces
     {
         void Debug(string message);
         void DebugFormat(string message, params object[] arg);
+        void Error(Exception e);
     }
 }

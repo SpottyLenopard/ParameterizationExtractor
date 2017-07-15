@@ -11,11 +11,12 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 {
     public class MSSqlBuilder : ISqlBuilder
     {
-        public string Build(IEnumerable<PRecord> tables)
+        public string Build(IEnumerable<PRecord> tables, ISourceSchema schema)
         {
             var template = new DefaultTemplate();
             template.Session = new Dictionary<string, object>();
             template.Session.Add("source", tables);
+            template.Session.Add("schema", schema);
 
             return template.TransformText();
         }        

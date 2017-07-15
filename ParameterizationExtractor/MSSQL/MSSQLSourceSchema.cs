@@ -84,21 +84,30 @@ and C.is_computed = 0
 order by C.column_id
 ";
 
-        private readonly IEnumerable<PDependentTable> _dependentTables;
-        private readonly IEnumerable<PTableMetadata> _tables;
-        public MSSQLSourceSchema(IEnumerable<PDependentTable> dependentTables, IEnumerable<PTableMetadata> tables)
+        private IEnumerable<PDependentTable> _dependentTables;
+        private IEnumerable<PTableMetadata> _tables;
+        private IUnitOfWorkFactory _uowFactory;
+        private IExtractConfiguration _globalConfiguration;
+        public MSSQLSourceSchema(IUnitOfWorkFactory uowf, IExtractConfiguration globalConfiguration)
         {
-            Affirm.ArgumentNotNull(dependentTables, "dependentTables");
-            Affirm.ArgumentNotNull(tables, "tables");
+            Affirm.ArgumentNotNull(uowf, "uowf");
 
-            _tables = tables;
-            _dependentTables = dependentTables;            
+            _uowFactory = uowf;
+            _globalConfiguration = globalConfiguration;
+            WasInit = false;    
+        }
+
+        private void CheckInit()
+        {
+            if (!WasInit)
+                throw new InvalidOperationException("MSSQLSourceSchema was not initialized!");
         }
 
         public IEnumerable<PDependentTable> DependentTables
         {
             get
             {
+                CheckInit();
                 return _dependentTables;
             }
         }
@@ -107,13 +116,136 @@ order by C.column_id
         {
             get
             {
+                CheckInit();
                 return _tables;
+            }
+        }
+
+        public bool WasInit
+        {
+            get; private set;
+        }
+
+        private string _database;
+        public string Database
+        {
+            get
+            {
+                CheckInit();
+                return _database;
+            }
+            private set
+            {
+                _database = value;
+            }
+        }
+
+        private string _dataSource;
+        public string DataSource
+        {
+            get
+            {
+                CheckInit();
+                return _dataSource;
+            }
+            private set
+            {
+                _dataSource = value;
             }
         }
 
         public PTableMetadata GetTableMetaData(string tableName)
         {
+            CheckInit();
             return Tables.First(_ => _.TableName == tableName);
+        }
+
+        public async Task Init()
+        {
+            var sourceInfo = Task.Run<Tuple<string, string>>(() => {
+                using (var uow = _uowFactory.GetUnitOfWork())
+                {
+                    return new Tuple<string, string>(uow.Database, uow.DataSource);
+                }
+            });
+            var dTables = GetDependentTables();
+            var MetaData = GetMetaData(new MetaDataInitializer());
+            await Task.WhenAll(dTables, MetaData, sourceInfo);
+
+            _dependentTables = dTables.Result;
+            _tables = MetaData.Result;
+            _database = sourceInfo.Result.Item1;
+            _dataSource = sourceInfo.Result.Item2;
+
+            WasInit = true;
+        }
+
+        private async Task<IEnumerable<PDependentTable>> GetDependentTables()
+        {
+            var result = new List<PDependentTable>();
+
+            using (var uof = _uowFactory.GetUnitOfWork())
+            using (var dr = await uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlFKs))
+            {
+                var dt = new DataTable();
+                dt.Load(dr);
+
+                foreach (DataRow r in dt.Rows)
+                {
+                    var item = new PDependentTable
+                    {
+                        Name = r["Name"].ToString(),
+                        ParentColumn = r["ParentColumn"].ToString(),
+                        ParentTable = r["ParentTable"].ToString(),
+                        ReferencedColumn = r["ReferencedColumn"].ToString(),
+                        ReferencedTable = r["ReferencedTable"].ToString()
+                    };
+
+                    result.Add(item);
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<IEnumerable<PTableMetadata>> GetMetaData(IMetaDataInitializer initializer)
+        {
+            var result = new List<PTableMetadata>();
+
+            using (var uof = _uowFactory.GetUnitOfWork())
+            {
+                var metaTables = uof.GetSchemaAsync("Tables");
+
+                var metaColumns = uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlPKColumns);
+
+                await Task.WhenAll(metaColumns, metaTables);
+
+                var dt = new DataTable();
+                dt.Load(metaColumns.Result);
+
+                var iList = dt.Rows.Cast<DataRow>();
+
+                foreach (DataRow t in metaTables.Result.Rows)
+                {
+                    var pTab = new PTableMetadata() { TableName = t["table_name"].ToString() };
+
+                    foreach (DataRow c in iList.Where(_ => _["TableName"].ToString() == pTab.TableName
+                                                            && !_globalConfiguration.FieldsToExclude.Any(f => f == _["ColumnName"].ToString())))
+                    {
+                        var field = initializer.InitTableMetaData(c);
+
+                        pTab.Add(field);
+
+                    }
+                    UniqueColumnsCollection uniqueColumns = null;
+                    if (_globalConfiguration.UniqueColums.TryGetValue(pTab.TableName, out uniqueColumns))
+                        pTab.UniqueColumnsCollection.AddRange(uniqueColumns);
+
+                    result.Add(pTab);
+                }
+            }
+
+            return result;
         }
     }
 }

@@ -20,6 +20,22 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             _sqlConnection.Open();
         }
 
+        public string Database
+        {
+            get
+            {
+                return _sqlConnection.Database;
+            }
+        }
+
+        public string DataSource
+        {
+            get
+            {
+                return _sqlConnection.DataSource;
+            }
+        }
+
         private bool IsOpened { get; set; }
 
         public void BeginTran()
