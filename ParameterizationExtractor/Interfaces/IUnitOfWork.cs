@@ -25,5 +25,6 @@ namespace Quipu.ParameterizationExtractor.Interfaces
     public interface IUnitOfWorkFactory
     {
         IUnitOfWork GetUnitOfWork();
+        IUnitOfWork GetUnitOfWork(string source);
     }
 }

@@ -16,17 +16,20 @@ namespace Quipu.ParameterizationExtractor.MSSQL
         private readonly ISourceSchema _schema;
         private readonly ILog _log;
         private readonly IPackageTemplate _template;
-        public DependencyBuilder(IUnitOfWorkFactory unitOfWorkFactory, ISourceSchema schema, ILog log, IPackageTemplate template)
+        private readonly IExtractConfiguration _configuration;
+        public DependencyBuilder(IUnitOfWorkFactory unitOfWorkFactory, ISourceSchema schema, ILog log, IPackageTemplate template, IExtractConfiguration configuration)
         {
             Affirm.ArgumentNotNull(unitOfWorkFactory, "unitOfWorkFactory");
             Affirm.ArgumentNotNull(schema, "schema");
             Affirm.ArgumentNotNull(log, "log");
             Affirm.ArgumentNotNull(template, "template");
+            Affirm.ArgumentNotNull(configuration, "configuration");
 
             _unitOfWorkFactory = unitOfWorkFactory;
             _schema = schema;
             _log = log;
             _template = template;
+            _configuration = configuration;
         }
 
         private HashSet<PRecord> processedTables;
@@ -74,14 +77,14 @@ namespace Quipu.ParameterizationExtractor.MSSQL
         {
             var fromTemplate = _template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.ExtractStrategy;
 
-            return fromTemplate ?? Program.GlobalConfiguration.DefaultExtractStrategy;
+            return fromTemplate ?? _configuration.DefaultExtractStrategy;
         }
 
         private SqlBuildStrategy GetSqlBuildStrategy(string tableName)
         {
             var fromTemplate = _template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.SqlBuildStrategy;
 
-            return fromTemplate ?? Program.GlobalConfiguration.DefaultSqlBuildStrategy;
+            return fromTemplate ?? _configuration.DefaultSqlBuildStrategy;
         }
 
         private async Task<IEnumerable<PRecord>> GetRelatedTables(PRecord table)
@@ -120,7 +123,6 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                     var i = (await insertTable(item.ReferencedTable, item.ParentColumn, item.ReferencedColumn))?.FirstOrDefault();
                     if (i != null)
                     {
-                        i.ExtractStrategy = GetExtractStrategy(i.TableName);
                         table.Parents.Add(new PTableDependency() { PRecord = i, FK = item });
                         result.Add(i);
                     }
@@ -133,7 +135,6 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                     {
                         foreach (var child in i)
                         {
-                            child.ExtractStrategy = GetExtractStrategy(child.TableName);
                             table.Childern.Add(new PTableDependency() { PRecord = child, FK = item });
                         }
 
@@ -166,7 +167,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                 while (reader.Read())
                 {
-                    result.Add(new PRecord(reader, tableMetaData) { Source = sql.Trim(), SqlBuildStrategy = GetSqlBuildStrategy(tableName) });
+                    result.Add(new PRecord(reader, tableMetaData) { Source = sql.Trim(), ExtractStrategy = GetExtractStrategy(tableName), SqlBuildStrategy = GetSqlBuildStrategy(tableName) });
                 }
             }
 
@@ -188,7 +189,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                 while (reader.Read())
                 {
-                    var record = new PRecord(reader, _schema.GetTableMetaData(tableName)) { Source = sql.Trim(), SqlBuildStrategy = GetSqlBuildStrategy(tableName) };
+                    var record = new PRecord(reader, _schema.GetTableMetaData(tableName)) { Source = sql.Trim(), ExtractStrategy = GetExtractStrategy(tableName) , SqlBuildStrategy = GetSqlBuildStrategy(tableName) };
                     var processed = processedTables.FirstOrDefault(_ => _.Equals(record));     
                     result.Add(processed ?? record);
                 }

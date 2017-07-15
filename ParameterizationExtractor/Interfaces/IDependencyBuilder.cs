@@ -26,5 +26,7 @@ namespace Quipu.ParameterizationExtractor.Interfaces
     {
         IList<string> FieldsToExclude { get; }
         IDictionary<string, UniqueColumnsCollection> UniqueColums { get; }
+        ExtractStrategy DefaultExtractStrategy { get; }
+        SqlBuildStrategy DefaultSqlBuildStrategy { get; }
     }
 }
