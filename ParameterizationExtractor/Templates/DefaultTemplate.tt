@@ -173,9 +173,11 @@ END CATCH
 					if (parent.IsIdentityPK)
 					{
 						InsertValues(fields,parent.TableName);
+						if (parent.Childern.Any())
+						{
 #>
-		set <#+ Write(parent.GetPKVarName());#> = SCOPE_IDENTITY()
-<#+  
+		set <#= parent.GetPKVarName()#> = SCOPE_IDENTITY()
+<#+						}
 					}
 					else 
 					{
@@ -227,9 +229,12 @@ END CATCH
 		else if (child.PkField.MetaData.IsIdentity)
 			{
 			InsertValues(fields,child.TableName); 
+				if (child.Childern.Any())
+				{
 #>
-		set <#+ Write(child.GetPKVarName());#> = SCOPE_IDENTITY()
+		set <#=child.GetPKVarName()#> = SCOPE_IDENTITY()
 <#+  
+				}
 			}
 			else
 			{

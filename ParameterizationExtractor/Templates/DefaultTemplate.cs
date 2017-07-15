@@ -455,33 +455,36 @@ this.Write("\t\t\tBegin \r\n");
 					if (parent.IsIdentityPK)
 					{
 						InsertValues(fields,parent.TableName);
-
-        
-        #line default
-        #line hidden
-        
-        #line 176 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
-this.Write("\t\tset ");
-
-        
-        #line default
-        #line hidden
-        
-        #line 177 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
- Write(parent.GetPKVarName());
-        
-        #line default
-        #line hidden
-        
-        #line 177 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
-this.Write(" = SCOPE_IDENTITY()\r\n");
+						if (parent.Childern.Any())
+						{
 
         
         #line default
         #line hidden
         
         #line 178 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
-  
+this.Write("\t\tset ");
+
+        
+        #line default
+        #line hidden
+        
+        #line 179 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+this.Write(this.ToStringHelper.ToStringWithCulture(parent.GetPKVarName()));
+
+        
+        #line default
+        #line hidden
+        
+        #line 179 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+this.Write(" = SCOPE_IDENTITY()\r\n");
+
+        
+        #line default
+        #line hidden
+        
+        #line 180 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+						}
 					}
 					else 
 					{
@@ -490,56 +493,56 @@ this.Write(" = SCOPE_IDENTITY()\r\n");
         #line default
         #line hidden
         
-        #line 182 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 184 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write("\t\t\t\tselect ");
 
         
         #line default
         #line hidden
         
-        #line 183 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 185 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.GetPKVarName()));
 
         
         #line default
         #line hidden
         
-        #line 183 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 185 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" = max(");
 
         
         #line default
         #line hidden
         
-        #line 183 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 185 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.PkField.FieldName));
 
         
         #line default
         #line hidden
         
-        #line 183 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 185 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(")+1 \r\n\t\t\t\tfrom ");
 
         
         #line default
         #line hidden
         
-        #line 184 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 186 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.TableName));
 
         
         #line default
         #line hidden
         
-        #line 184 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 186 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" \r\n\t\t");
 
         
         #line default
         #line hidden
         
-        #line 185 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 187 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 InsertValues(SqlHelper.InjectSqlVariable(fields,parent.GetPKVarName(),parent.PkField.FieldName),parent.TableName);				
 					}
 				}
@@ -551,27 +554,27 @@ InsertValues(SqlHelper.InjectSqlVariable(fields,parent.GetPKVarName(),parent.PkF
         #line default
         #line hidden
         
-        #line 191 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 193 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write("\t\tset ");
 
         
         #line default
         #line hidden
         
-        #line 192 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 194 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
  Write(parent.GetPKVarName());
         
         #line default
         #line hidden
         
-        #line 192 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 194 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" = ");
 
         
         #line default
         #line hidden
         
-        #line 192 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 194 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 Write(parent.PkField.ValueToSqlString());
 				}
 
@@ -579,112 +582,112 @@ Write(parent.PkField.ValueToSqlString());
         #line default
         #line hidden
         
-        #line 194 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 196 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write("\t\t\tEnd\r\n\t\t\tElse \r\n\t\t\tBegin\r\n\t\t\t\tupdate ");
 
         
         #line default
         #line hidden
         
-        #line 197 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 199 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.TableName));
 
         
         #line default
         #line hidden
         
-        #line 197 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 199 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" \r\n\t\t\t\tset ");
 
         
         #line default
         #line hidden
         
-        #line 198 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 200 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(SqlHelper.GetNameValueForUpdateString(fields)));
 
         
         #line default
         #line hidden
         
-        #line 198 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 200 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" \r\n\t\t\t\t");
 
         
         #line default
         #line hidden
         
-        #line 199 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 201 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.GetUniqueSqlWhere()));
 
         
         #line default
         #line hidden
         
-        #line 199 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 201 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" \r\n\r\n\t\t\t\tselect ");
 
         
         #line default
         #line hidden
         
-        #line 201 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 203 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.GetPKVarName()));
 
         
         #line default
         #line hidden
         
-        #line 201 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 203 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" = ");
 
         
         #line default
         #line hidden
         
-        #line 201 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 203 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.PkField.FieldName));
 
         
         #line default
         #line hidden
         
-        #line 201 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 203 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" \r\n\t\t\t\tfrom ");
 
         
         #line default
         #line hidden
         
-        #line 202 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 204 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.TableName));
 
         
         #line default
         #line hidden
         
-        #line 202 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 204 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" \r\n\t\t\t\t");
 
         
         #line default
         #line hidden
         
-        #line 203 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 205 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(this.ToStringHelper.ToStringWithCulture(parent.GetUniqueSqlWhere()));
 
         
         #line default
         #line hidden
         
-        #line 203 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 205 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" \r\n\r\n\t\t\tEnd ");
 
         
         #line default
         #line hidden
         
-        #line 205 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 207 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 
 			}
 	}
@@ -699,20 +702,20 @@ this.Write(" \r\n\r\n\t\t\tEnd ");
         #line default
         #line hidden
         
-        #line 214 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 216 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write("\t\tdeclare ");
 
         
         #line default
         #line hidden
         
-        #line 215 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 217 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
  Write(string.Format("{0} {1}\n",child.GetPKVarName(), child.PkField.MetaData.SqlType));
         
         #line default
         #line hidden
         
-        #line 216 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 218 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 
 			if (!child.PkField.MetaData.IsIdentity
 					&& child.PkField.MetaData.FieldType.IsNumericType()
@@ -723,79 +726,83 @@ this.Write("\t\tdeclare ");
         #line default
         #line hidden
         
-        #line 221 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 223 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write("\t\tselect ");
 
         
         #line default
         #line hidden
         
-        #line 222 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 224 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 Write(child.GetPKVarName());
         
         #line default
         #line hidden
         
-        #line 222 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 224 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" = max(");
 
         
         #line default
         #line hidden
         
-        #line 222 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 224 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 Write(child.PkField.FieldName);
         
         #line default
         #line hidden
         
-        #line 222 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 224 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(")+1 \r\n\t\tfrom ");
 
         
         #line default
         #line hidden
         
-        #line 223 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 225 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 Write(child.TableName);
 
         
         #line default
         #line hidden
         
-        #line 225 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 227 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 InsertValues(SqlHelper.InjectSqlVariable(fields,child.GetPKVarName(),child.PkField.FieldName),child.TableName);
 		}
 		else if (child.PkField.MetaData.IsIdentity)
 			{
 			InsertValues(fields,child.TableName); 
+				if (child.Childern.Any())
+				{
 
         
         #line default
         #line hidden
         
-        #line 230 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 234 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write("\t\tset ");
 
         
         #line default
         #line hidden
         
-        #line 231 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
- Write(child.GetPKVarName());
+        #line 235 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+this.Write(this.ToStringHelper.ToStringWithCulture(child.GetPKVarName()));
+
         
         #line default
         #line hidden
         
-        #line 231 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 235 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" = SCOPE_IDENTITY()\r\n");
 
         
         #line default
         #line hidden
         
-        #line 232 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 236 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
   
+				}
 			}
 			else
 			{
@@ -804,27 +811,27 @@ this.Write(" = SCOPE_IDENTITY()\r\n");
         #line default
         #line hidden
         
-        #line 236 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 241 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write("\t\tset ");
 
         
         #line default
         #line hidden
         
-        #line 237 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 242 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
  Write(child.GetPKVarName());
         
         #line default
         #line hidden
         
-        #line 237 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 242 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 this.Write(" = ");
 
         
         #line default
         #line hidden
         
-        #line 237 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
+        #line 242 "C:\MyProjects\ParameterizationExtractor\ParameterizationExtractor\ParameterizationExtractor\Templates\DefaultTemplate.tt"
 Write(child.PkField.ValueToSqlString());
 			}
 	  Write("\n");
