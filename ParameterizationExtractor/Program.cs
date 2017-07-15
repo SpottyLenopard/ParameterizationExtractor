@@ -169,7 +169,7 @@ namespace ParameterizationExtractor
 
             //"ServiceJobItemRelationLog" "ServiceJobLog" "ServiceJobItemRelationLog"
 
-            var schema = new MSSQLSourceSchema(UnitOfWorkFactory.GetInstance(), GlobalConfiguration);
+            var schema = new MSSQLSourceSchema(UnitOfWorkFactory.GetInstance(), GlobalExtractConfiguration.GetInstance());
 
             await schema.Init();
 
