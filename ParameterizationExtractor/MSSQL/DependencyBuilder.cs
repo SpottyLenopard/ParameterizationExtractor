@@ -15,23 +15,37 @@ namespace Quipu.ParameterizationExtractor.MSSQL
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly ISourceSchema _schema;
         private readonly ILog _log;
-        public DependencyBuilder(IUnitOfWorkFactory unitOfWorkFactory, ISourceSchema schema, ILog log)
+        private readonly IPackageTemplate _template;
+        public DependencyBuilder(IUnitOfWorkFactory unitOfWorkFactory, ISourceSchema schema, ILog log, IPackageTemplate template)
         {
+            Affirm.ArgumentNotNull(unitOfWorkFactory, "unitOfWorkFactory");
+            Affirm.ArgumentNotNull(schema, "schema");
+            Affirm.ArgumentNotNull(log, "log");
+            Affirm.ArgumentNotNull(template, "template");
+
             _unitOfWorkFactory = unitOfWorkFactory;
             _schema = schema;
             _log = log;
+            _template = template;
         }
 
-        public async Task<IEnumerable<PRecord>> PrepareAsync(IPackageTemplate template)
+        private HashSet<PRecord> processedTables;
+
+        public async Task<IEnumerable<PRecord>> PrepareAsync()
         {
-            var processedTables = new HashSet<PRecord>();
+            processedTables = new HashSet<PRecord>();
             var stack = new Stack<PRecord>();
 
-            foreach (var root in template.RootRecords)
+            foreach (var root in _template.RootRecords)
             {
-                var rootTable = await GetPTable(root.TableName, root.PkValue);
-                rootTable.IsStartingPoint = true;
-                stack.Push(rootTable);
+                foreach (var rootTable in await GetPTables(root.TableName, root.Where))
+                {
+                    if (rootTable != null)
+                    {
+                        rootTable.IsStartingPoint = true;
+                        stack.Push(rootTable);
+                    }
+                }
             }
 
             while (stack.Count > 0)
@@ -43,9 +57,9 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                 {
                     processedTables.Add(record);
 
-                    foreach (var item in await GetRelatedTables(record, template))
+                    foreach (var item in await GetRelatedTables(record))
                     {
-                        if (!template.Exceptions.Any(_ => _ == item.TableName))
+                        if (!_template.Exceptions.Any(_ => _ == item.TableName))
                             stack.Push(item);
                     }
 
@@ -56,19 +70,23 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return processedTables.Where(_ => _.IsStartingPoint).ToList();
         }
 
-        private ExtractStrategy GetExtractStrategy(string tableName, IPackageTemplate template)
+        private ExtractStrategy GetExtractStrategy(string tableName)
         {
-            var fromTemplate = template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.ExtractStrategy;
+            var fromTemplate = _template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.ExtractStrategy;
 
             return fromTemplate ?? Program.GlobalConfiguration.DefaultExtractStrategy;
         }
 
-        private async Task<IEnumerable<PRecord>> GetRelatedTables(PRecord table, IPackageTemplate template)
+        private SqlBuildStrategy GetSqlBuildStrategy(string tableName)
+        {
+            var fromTemplate = _template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.SqlBuildStrategy;
+
+            return fromTemplate ?? Program.GlobalConfiguration.DefaultSqlBuildStrategy;
+        }
+
+        private async Task<IEnumerable<PRecord>> GetRelatedTables(PRecord table)
         {
             var result = new List<PRecord>();
-
-            //if (!table.IsStartingPoint && !_schema.DependentTables.Any(_ => _.ParentTable == table.TableName))
-            //    return result;
 
             var tables = _schema.DependentTables.Where(_ => _.ParentTable == table.TableName)
                                     .Union(_schema.DependentTables.Where(_ => _.ReferencedTable == table.TableName));
@@ -76,11 +94,15 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             foreach (var item in tables)
             {
                 _log.DebugFormat("parent table: {0} referenced table {1}", item.ParentTable, item.ReferencedTable);
+                var extractStrategy = GetExtractStrategy(table.TableName);
 
                 Func<string, string, string, Task<IEnumerable<PRecord>>> insertTable = async (tableName, columnName, pkColumn) =>
                 {
                     //if (template.Exceptions.Any(_ => _ == tableName))
-                    if (!template.TablesToProcess.Any(_ => _.TableName == tableName))
+                    if (!_template.TablesToProcess.Any(_ => _.TableName == tableName))
+                        return await Task.FromResult<IEnumerable<PRecord>>(null);
+
+                    if (extractStrategy.DependencyToExclude.Any(_ => _ == tableName))
                         return await Task.FromResult<IEnumerable<PRecord>>(null);
 
                     var value = table.FirstOrDefault(_ => _.FieldName == columnName)?.ValueToSqlString();
@@ -92,14 +114,14 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                     return await Task.FromResult<IEnumerable<PRecord>>(null);
                 };
-                var extractStrategy = GetExtractStrategy(table.TableName, template);
-
+               
                 if (item.ParentTable == table.TableName
                     && extractStrategy.ProcessParents)
                 {
                     var i = (await insertTable(item.ReferencedTable, item.ParentColumn, item.ReferencedColumn))?.FirstOrDefault();
                     if (i != null)
                     {
+                        i.ExtractStrategy = GetExtractStrategy(i.TableName);
                         table.Parents.Add(new PTableDependency() { PRecord = i, FK = item });
                         result.Add(i);
                     }
@@ -111,7 +133,10 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                     if (i != null)
                     {
                         foreach (var child in i)
+                        {
+                            child.ExtractStrategy = GetExtractStrategy(child.TableName);
                             table.Childern.Add(new PTableDependency() { PRecord = child, FK = item });
+                        }
 
                         result.AddRange(i);
                     }
@@ -130,14 +155,19 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             var sql = string.Format("select * from {0} where [{1}] = {2}", tableName, tableMetaData.PK.FieldName, objectId);
 
             _log.DebugFormat("GetPTable : {0}", sql);
-
+            var processed = processedTables.FirstOrDefault(_ => _.TableName == tableName && _.PK == objectId);
+            if (processed != null)
+            {
+                _log.DebugFormat("Object ({0}) with id {1} has been found in processedTables", processed.TableName, processed.PK);
+                return processed;
+            }
             using (var uow = _unitOfWorkFactory.GetUnitOfWork())
             {
                 var reader = await uow.ExecuteReaderAsync(sql);
 
                 while (reader.Read())
                 {
-                    result.Add(new PRecord(reader, tableMetaData) { Source = sql.Trim() });
+                    result.Add(new PRecord(reader, tableMetaData) { Source = sql.Trim(), SqlBuildStrategy = GetSqlBuildStrategy(tableName) });
                 }
             }
 
@@ -147,7 +177,10 @@ namespace Quipu.ParameterizationExtractor.MSSQL
         public async Task<IEnumerable<PRecord>> GetPTables(string tableName, string where)
         {
             var result = new List<PRecord>();
-            var sql = string.Format("select * from {0} where {1}", tableName, where);
+            var sql = string.Format("select * from {0} ", tableName);
+            if (!string.IsNullOrEmpty(where))
+                sql = string.Format("{0} where {1} ", sql, where);
+
             _log.DebugFormat("GetPTables : {0}", sql);
 
             using (var uow = _unitOfWorkFactory.GetUnitOfWork())
@@ -156,7 +189,9 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                 while (reader.Read())
                 {
-                    result.Add(new PRecord(reader, _schema.GetTableMetaData(tableName)) { Source = sql.Trim() });
+                    var record = new PRecord(reader, _schema.GetTableMetaData(tableName)) { Source = sql.Trim(), SqlBuildStrategy = GetSqlBuildStrategy(tableName) };
+                    var processed = processedTables.FirstOrDefault(_ => _.Equals(record));     
+                    result.Add(processed ?? record);
                 }
             }
 

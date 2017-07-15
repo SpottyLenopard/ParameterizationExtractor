@@ -10,7 +10,7 @@ namespace Quipu.ParameterizationExtractor.Model
     public class PackageTemplate : IPackageTemplate
     {
         private readonly IDictionary<string, UniqueColumnsCollection> _uniqueColums = new Dictionary<string, UniqueColumnsCollection>();
-        private readonly IList<RecordToExtract> _rootRecords = new List<RecordToExtract>();
+        private readonly IList<RecordsToExtract> _rootRecords = new List<RecordsToExtract>();
         private readonly IList<string> _exceptions = new List<string>();
         private readonly IList<TableToExtract> _tablesToProcess = new List<TableToExtract>(); 
 
@@ -18,6 +18,11 @@ namespace Quipu.ParameterizationExtractor.Model
         {
 
         }
+
+        public int Order { get; set; }
+
+        public string PackageName { get; set; }
+
         public IDictionary<string, UniqueColumnsCollection> UniqueColums
         {
             get
@@ -28,7 +33,7 @@ namespace Quipu.ParameterizationExtractor.Model
 
         public IList<string> Exceptions { get { return _exceptions; } }
 
-        public IList<RecordToExtract> RootRecords
+        public IList<RecordsToExtract> RootRecords
         {
             get
             {
@@ -42,6 +47,11 @@ namespace Quipu.ParameterizationExtractor.Model
             {
                 return _tablesToProcess;
             }
+        }
+
+        public string Comments
+        {
+            get; set;
         }
     }
 }

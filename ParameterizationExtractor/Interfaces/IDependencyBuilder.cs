@@ -9,14 +9,17 @@ namespace Quipu.ParameterizationExtractor.Interfaces
 {
     public interface IDependencyBuilder
     {
-        Task<IEnumerable<PRecord>> PrepareAsync(IPackageTemplate template);
+        Task<IEnumerable<PRecord>> PrepareAsync();
     }
 
     public interface IPackageTemplate
     {
-        IList<RecordToExtract> RootRecords { get; }
+        IList<RecordsToExtract> RootRecords { get; }
         IList<string> Exceptions { get; }                
         IList<TableToExtract> TablesToProcess { get; }
+        int Order { get; set; }
+        string PackageName { get; set; }
+        string Comments { get; set; }
     }
 
     public interface IExtractConfiguration

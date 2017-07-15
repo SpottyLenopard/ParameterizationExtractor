@@ -8,31 +8,41 @@ namespace Quipu.ParameterizationExtractor.Model
 {
     public abstract class ExtractStrategy
     {
-        protected ExtractStrategy(bool processChildren, bool processParents)
+        protected ExtractStrategy(bool processChildren, bool processParents) : this(processChildren, processParents, new List<string>())
+        {
+        }
+
+
+        protected ExtractStrategy(bool processChildren, bool processParents, IList<string> dependencyToExclue)
         {
             ProcessChildren = processChildren;
             ProcessParents = processParents;
+            DependencyToExclude = dependencyToExclue;
         }
-        public bool ProcessChildren { get; protected set; }
-        public bool ProcessParents { get; protected set; }
+        public bool ProcessChildren { get; private set; }
+        public bool ProcessParents { get; private set; }       
+        public IList<string> DependencyToExclude { get; private set; }
 
     }
 
     public class FKDependencyExtractStrategy: ExtractStrategy
     {
         public FKDependencyExtractStrategy() : base(true, true) { }
+        public FKDependencyExtractStrategy(IList<string> dependencyToExclue) : base(true, true, dependencyToExclue) { }
     }
+
     public class OnlyParentExtractStrategy : ExtractStrategy
     {
         public OnlyParentExtractStrategy() : base(false, true) { }
     }
+
     public class OnlyChildrenExtractStrategy : ExtractStrategy
     {
         public OnlyChildrenExtractStrategy() : base(true, false) { }
     }
 
-    public class OnlyOneTableEtraction : ExtractStrategy
+    public class OnlyOneTableExtractStrategy : ExtractStrategy
     {
-        public OnlyOneTableEtraction() : base(false, false) { }
+        public OnlyOneTableExtractStrategy() : base(false, false) { }
     }
 }

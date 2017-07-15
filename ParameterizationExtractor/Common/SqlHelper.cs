@@ -29,9 +29,26 @@ namespace Quipu.ParameterizationExtractor.Common
             return InjectSqlVariable(NotIdentityFields(child), sqlVar, child.TableName == fk.ParentTable ? fk.ParentColumn : fk.ReferencedColumn);
         }
 
+        public static string GetSeparatedNameValueString(IEnumerable<PField> fields, string separator, Func<PField,string> valueGetter)
+        {
+            return string.Join(separator, fields.Select(_ => string.Format("[{0}] = {1}", _.FieldName, valueGetter?.Invoke(_))));
+
+        }
+
         public static string GetNameValueString(IEnumerable<PField> fields)
         {
-            return string.Join(" and ", fields.Select(_ => string.Format("[{0}] = {1}", _.FieldName, _.ValueToSqlString())));
+            return GetSeparatedNameValueString(fields, " and ", _ => _.ValueToSqlString());
+            //return string.Join(" and ", fields.Select(_ => string.Format("[{0}] = {1}", _.FieldName, _.ValueToSqlString())));
+        }
+
+        public static string GetNameValueForUpdateString(IEnumerable<PField> fields)
+        {
+            return GetSeparatedNameValueString(fields, " , ", _ => _.ValueToSqlString());
+        }
+        public static string GetNameNormalValueString(IEnumerable<PField> fields)
+        {
+            return GetSeparatedNameValueString(fields, " ", _ => _.Value.ToString());
+            //return string.Join(" ", fields.Select(_ => string.Format("[{0}] = {1}", _.FieldName, _.Value)));
         }
 
         public static string IfExistsSql(PRecord table)

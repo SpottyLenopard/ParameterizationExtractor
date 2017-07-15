@@ -48,6 +48,8 @@ namespace Quipu.ParameterizationExtractor.Model
             _children = new List<PTableDependency>();
         }
 
+        public ExtractStrategy ExtractStrategy { get; set; }
+        public SqlBuildStrategy SqlBuildStrategy { get; set; }
         private readonly IList<PTableDependency> _parents;
         private readonly IList<PTableDependency> _children;
         public IList<PTableDependency> Childern { get { return _children; } }
@@ -78,16 +80,23 @@ namespace Quipu.ParameterizationExtractor.Model
             return string.Format("{0} {1}",TableName,PK);
         }        
 
-        public string GetUniqueSqlWhere()
+        public IEnumerable<PField> GetUniqueFields()
         {
-            string s = string.Empty;
-
             var list = new List<PField>();
             if (UniqueFields != null
                 && UniqueFields.Any())
                 list.AddRange(UniqueFields);
             else if (PkField != null)
                 list.Add(PkField);
+
+            return list;
+        }
+
+        public string GetUniqueSqlWhere()
+        {
+            string s = string.Empty;
+
+            var list = GetUniqueFields();
 
             if (list.Any())
             {
@@ -101,6 +110,9 @@ namespace Quipu.ParameterizationExtractor.Model
         {
             return string.Format("@{0}_{1}_{2}", TableName, PkField?.FieldName, PK);
         }
+
+        public bool IsNumericPK { get { return PkField == null ? false : PkField.MetaData.FieldType.IsNumericType(); } }
+        public bool IsIdentityPK { get { return PkField == null ? false : PkField.MetaData.IsIdentity; } }
     }
 
     [DebuggerDisplay("{FieldName}")]
@@ -124,9 +136,11 @@ namespace Quipu.ParameterizationExtractor.Model
             if (!string.IsNullOrEmpty(Expression))
                 return Expression;
 
+            var str = string.Empty;
+
             if (_metaData.FieldType == typeof(string))
             {
-                return string.Format("'{0}'", Value.ToString());
+                return string.Format("'{0}'", PrepareValueForScript(Value.ToString()));
             }
             else if (_metaData.FieldType == typeof(bool))
             {
@@ -139,7 +153,14 @@ namespace Quipu.ParameterizationExtractor.Model
                 return string.Format("'{0}'", date.ToString("yyyy-MM-dd HH:mm:ss.fff"));
             }
             else
-                return Value.ToString();
+                str = PrepareValueForScript(Value.ToString());
+
+            return str;
+        }        
+
+        private string PrepareValueForScript(string value)
+        {
+            return value.Replace("'", "''");
         }
     }
 }

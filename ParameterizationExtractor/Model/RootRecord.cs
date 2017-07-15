@@ -8,35 +8,43 @@ namespace Quipu.ParameterizationExtractor.Model
 {
     public class TableToExtract
     {
-        public TableToExtract(string tableName) : this(tableName,new FKDependencyExtractStrategy())
+        public TableToExtract(string tableName, ExtractStrategy extractStrategy) : this(tableName, extractStrategy, new SqlBuildStrategy())
         {
 
         }
 
-        public TableToExtract(string tableName,  ExtractStrategy extractStrategy)
+        public TableToExtract(string tableName) : this(tableName,new FKDependencyExtractStrategy(), new SqlBuildStrategy())
+        {
+
+        }
+
+        public TableToExtract(string tableName,  ExtractStrategy extractStrategy, SqlBuildStrategy sqlBuildStrategy)
         {
             Affirm.NotNullOrEmpty(tableName, "tableName");
             Affirm.ArgumentNotNull(extractStrategy, "extractStrategy");
+            Affirm.ArgumentNotNull(sqlBuildStrategy, "sqlBuildStrategy");
 
             TableName = tableName;
             ExtractStrategy = extractStrategy;
+            SqlBuildStrategy = sqlBuildStrategy;
         }
         public string TableName { get; set; }
 
         public ExtractStrategy ExtractStrategy { get; private set; }
+        public SqlBuildStrategy SqlBuildStrategy { get; private set; }
     }
 
-    public class RecordToExtract
+    public class RecordsToExtract 
     {
-        public RecordToExtract(string tableName, string pkValue)
+        public RecordsToExtract(string tableName, string where)
         {
-            Affirm.NotNullOrEmpty(tableName, "tableName");
-            Affirm.NotNullOrEmpty(pkValue, "pkValue");
+            Affirm.NotNullOrEmpty(tableName, "tableName");          
 
             TableName = tableName;
-            PkValue = pkValue;
+            Where = where;
         }
         public string TableName { get; set; }
-        public string PkValue { get; set; }
+        public string Where { get; set; }
+
     }
 }

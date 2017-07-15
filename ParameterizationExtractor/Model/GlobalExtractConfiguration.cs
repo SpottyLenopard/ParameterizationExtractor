@@ -34,6 +34,7 @@ namespace Quipu.ParameterizationExtractor.Model
             }
         }
 
-        public ExtractStrategy DefaultExtractStrategy { get; set; }         
+        public ExtractStrategy DefaultExtractStrategy { get; set; }
+        public SqlBuildStrategy DefaultSqlBuildStrategy { get; set; }
     }
 }
