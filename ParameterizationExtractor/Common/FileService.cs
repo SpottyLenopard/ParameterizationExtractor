@@ -10,6 +10,16 @@ namespace Quipu.ParameterizationExtractor.Common
 {
     public class FileService : SingletonBase<FileService>, IFileService
     {
+        public void CreateDirectory(string path)
+        {
+            System.IO.Directory.CreateDirectory(path);
+        }
+
+        public bool DirectoryExists(string path)
+        {
+            return System.IO.Directory.Exists(path);
+        }
+
         public void Save(string file, string path)
         {
             System.IO.File.WriteAllText(path, file);

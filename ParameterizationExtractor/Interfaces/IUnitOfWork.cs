@@ -15,9 +15,9 @@ namespace Quipu.ParameterizationExtractor.Interfaces
         void Rollback();
         void Commit();
 
-        Task<DataTable> GetSchemaAsync(string collectionName);
-        Task<DataTable> GetSchemaAsync(string collectionName, string[] restrictionValues);       
-        Task<SqlDataReader> ExecuteReaderAsync(string sql);
+        Task<DataTable> GetSchemaAsync(string collectionName, CancellationToken cancellationToken);
+        Task<DataTable> GetSchemaAsync(string collectionName, string[] restrictionValues, CancellationToken cancellationToken);       
+        Task<SqlDataReader> ExecuteReaderAsync(string sql, CancellationToken cancellationToken);
         string Database { get; }
         string DataSource { get; }
     }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Quipu.ParameterizationExtractor.Model;
 using Quipu.ParameterizationExtractor.Common;
 using ParameterizationExtractor;
+using System.Threading;
 
 namespace Quipu.ParameterizationExtractor.MSSQL
 {
@@ -34,15 +35,17 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
         private HashSet<PRecord> processedTables;
 
-        public async Task<IEnumerable<PRecord>> PrepareAsync()
+        public async Task<IEnumerable<PRecord>> PrepareAsync(CancellationToken cancellationToken)
         {
             processedTables = new HashSet<PRecord>();
             var stack = new Stack<PRecord>();
 
             foreach (var root in _template.RootRecords)
             {
-                foreach (var rootTable in await GetPTables(root.TableName, root.Where))
+                cancellationToken.ThrowIfCancellationRequested();
+                foreach (var rootTable in await GetPTables(root.TableName, root.Where,cancellationToken))
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     if (rootTable != null)
                     {
                         rootTable.IsStartingPoint = true;
@@ -53,6 +56,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
             while (stack.Count > 0)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 _log.Debug("Start iteration");
                 var record = stack.Pop();
                 _log.DebugFormat("{0} is processing now. {1}", record.TableName, record.Source);
@@ -60,7 +64,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                 {
                     processedTables.Add(record);
 
-                    foreach (var item in await GetRelatedTables(record))
+                    foreach (var item in await GetRelatedTables(record, cancellationToken))
                     {
                         if (!_template.Exceptions.Any(_ => _ == item.TableName))
                             stack.Push(item);
@@ -87,8 +91,9 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return fromTemplate ?? _configuration.DefaultSqlBuildStrategy;
         }
 
-        private async Task<IEnumerable<PRecord>> GetRelatedTables(PRecord table)
+        private async Task<IEnumerable<PRecord>> GetRelatedTables(PRecord table, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var result = new List<PRecord>();
 
             var tables = _schema.DependentTables.Where(_ => _.ParentTable == table.TableName)
@@ -96,11 +101,13 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
             foreach (var item in tables)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 _log.DebugFormat("parent table: {0} referenced table {1}", item.ParentTable, item.ReferencedTable);
                 var extractStrategy = GetExtractStrategy(table.TableName);
 
                 Func<string, string, string, Task<IEnumerable<PRecord>>> insertTable = async (tableName, columnName, pkColumn) =>
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     if (!_template.TablesToProcess.Any(_ => _.TableName == tableName))
                         return await Task.FromResult<IEnumerable<PRecord>>(null);
 
@@ -111,7 +118,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                     if (value != null)
                     {
                         var str = string.Format("{0} = {1}", pkColumn, value);
-                        return await GetPTables(tableName, str);
+                        return await GetPTables(tableName, str,cancellationToken);
                     }
 
                     return await Task.FromResult<IEnumerable<PRecord>>(null);
@@ -146,8 +153,10 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return result;
         }
 
-        public async Task<PRecord> GetPTable(string tableName, string objectId)
+        public async Task<PRecord> GetPTable(string tableName, string objectId, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var result = new List<PRecord>();
 
             var tableMetaData = _schema.GetTableMetaData(tableName);
@@ -163,7 +172,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             }
             using (var uow = _unitOfWorkFactory.GetUnitOfWork())
             {
-                var reader = await uow.ExecuteReaderAsync(sql);
+                var reader = await uow.ExecuteReaderAsync(sql, cancellationToken);
 
                 while (reader.Read())
                 {
@@ -174,8 +183,9 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return result.FirstOrDefault();
         }
 
-        public async Task<IEnumerable<PRecord>> GetPTables(string tableName, string where)
+        public async Task<IEnumerable<PRecord>> GetPTables(string tableName, string where, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var result = new List<PRecord>();
             var sql = string.Format("select * from {0} ", tableName);
             if (!string.IsNullOrEmpty(where))
@@ -185,10 +195,12 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
             using (var uow = _unitOfWorkFactory.GetUnitOfWork())
             {
-                var reader = await uow.ExecuteReaderAsync(sql);
+                var reader = await uow.ExecuteReaderAsync(sql, cancellationToken);
 
                 while (reader.Read())
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     var record = new PRecord(reader, _schema.GetTableMetaData(tableName)) { Source = sql.Trim(), ExtractStrategy = GetExtractStrategy(tableName) , SqlBuildStrategy = GetSqlBuildStrategy(tableName) };
                     var processed = processedTables.FirstOrDefault(_ => _.Equals(record));     
                     result.Add(processed ?? record);

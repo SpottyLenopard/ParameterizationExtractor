@@ -11,5 +11,7 @@ namespace Quipu.ParameterizationExtractor.Interfaces
     {
         void Save(Stream file, string path);
         void Save(string file, string path);
+        bool DirectoryExists(string path);
+        void CreateDirectory(string path);
     }
 }

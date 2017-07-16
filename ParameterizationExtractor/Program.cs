@@ -58,11 +58,11 @@ namespace ParameterizationExtractor
             {
                 var builder = new DependencyBuilder(UnitOfWorkFactory.GetInstance(), schema, _log, pckg, GlobalExtractConfiguration.GetInstance());
 
-                var pTables = await builder.PrepareAsync();
+                var pTables = await builder.PrepareAsync(token);
                 var sqlBuilder = new MSSqlBuilder();
 
-                if (!System.IO.Directory.Exists(".\\Output"))
-                    System.IO.Directory.CreateDirectory(".\\Output");
+                if (!FileService.GetInstance().DirectoryExists(".\\Output"))
+                    FileService.GetInstance().CreateDirectory(".\\Output");
 
                 FileService.GetInstance().Save(sqlBuilder.Build(pTables,schema), string.Format(".\\Output\\{0}_p_{1}.sql", pckg.Order, pckg.PackageName));
             }

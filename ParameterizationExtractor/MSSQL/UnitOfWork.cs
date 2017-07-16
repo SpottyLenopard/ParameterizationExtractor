@@ -60,20 +60,26 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                 _sqlConnection.Dispose();
         }
 
-        public Task<SqlDataReader> ExecuteReaderAsync(string sql)
-        {
+        public Task<SqlDataReader> ExecuteReaderAsync(string sql, CancellationToken cancellationToken)
+        {            
+            cancellationToken.ThrowIfCancellationRequested();
+
             var com = new SqlCommand(sql, _sqlConnection, _transaction);
 
-            return com.ExecuteReaderAsync();
-        }
-      
-        public Task<DataTable> GetSchemaAsync(string collectionName)
-        {
-            return Task.Run(() => _sqlConnection.GetSchema(collectionName));
+            return com.ExecuteReaderAsync(cancellationToken);
         }
 
-        public Task<DataTable> GetSchemaAsync(string collectionName, string[] restrictionValues)
+        public Task<DataTable> GetSchemaAsync(string collectionName, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return Task.Run(() => _sqlConnection.GetSchema(collectionName), cancellationToken);
+        }
+
+        public Task<DataTable> GetSchemaAsync(string collectionName, string[] restrictionValues, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
             return Task.Run(() => _sqlConnection.GetSchema(collectionName, restrictionValues));
         }
 
