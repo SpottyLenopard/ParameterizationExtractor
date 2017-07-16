@@ -12,7 +12,7 @@ namespace Quipu.ParameterizationExtractor.Model
     {
         public PTableMetadata()
         {
-            UniqueColumnsCollection = new UniqueColumnsCollection();
+            UniqueColumnsCollection = new List<string>();
         }
 
         private PFieldMetadata _pk;
@@ -25,12 +25,7 @@ namespace Quipu.ParameterizationExtractor.Model
             }
         }
         public string TableName { get; set; }
-        public UniqueColumnsCollection UniqueColumnsCollection { get; set; }
-    }
-
-    public class UniqueColumnsCollection : List<string>
-    {
-
+        public IList<string> UniqueColumnsCollection { get; set; }
     }
      
     public class PFieldMetadata 

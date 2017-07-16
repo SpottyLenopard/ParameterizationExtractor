@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Quipu.ParameterizationExtractor.Model
 {
+    [Serializable]
     public class SqlBuildStrategy
     {
         public SqlBuildStrategy()
@@ -21,8 +23,11 @@ namespace Quipu.ParameterizationExtractor.Model
             AsIsInserts = asIsInserts;
         }
 
-        public bool ThrowExecptionIfNotExists { get; private set; }
-        public bool NoInserts { get; private set; }
-        public bool AsIsInserts { get; private set; }
+        [XmlAttribute()]
+        public bool ThrowExecptionIfNotExists { get; set; }
+        [XmlAttribute()]
+        public bool NoInserts { get; set; }
+        [XmlAttribute()]
+        public bool AsIsInserts { get; set; }
     }
 }

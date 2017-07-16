@@ -12,17 +12,25 @@ using Quipu.ParameterizationExtractor.Templates;
 using Quipu.ParameterizationExtractor.Common;
 using System.Threading;
 using Quipu.ParameterizationExtractor;
+using Quipu.ParameterizationExtractor.Configs;
 
 namespace ParameterizationExtractor
 {
     public class Program
     {
-        private static ILog _log;        
-        
+        private static ILog _log;
+        private static IExtractConfiguration _globalConfig;
         static void Main(string[] args)
         {
             _log = new ConsoleLogger();
-
+            if (!args.Any())
+            {
+                _log.DebugFormat("Please specify path to package, usage ParameterizationExtractor.exe [path-to-package]");
+                Console.ReadKey();
+                return;
+            }
+            
+            _globalConfig = ConfigSerializer.GetInstance().GetGlobalConfig();
             CancellationTokenSource cts = new CancellationTokenSource();
 
             System.Console.CancelKeyPress += (s, e) =>
@@ -33,7 +41,9 @@ namespace ParameterizationExtractor
 
             try
             {
-                MainAsync(TestPackages.Get(), cts.Token)
+                var pckg = ConfigSerializer.GetInstance().GetPackage(args[0]);
+
+                MainAsync(pckg, cts.Token)
                     .GetAwaiter()
                     .GetResult();
             }
@@ -46,17 +56,17 @@ namespace ParameterizationExtractor
         }
 
         
-        static async Task MainAsync(IEnumerable<IPackageTemplate> pckgs, CancellationToken token)
+        static async Task MainAsync(IPackage pckg, CancellationToken token)
         {
-            Affirm.ArgumentNotNull(pckgs, "pckgs");
+            Affirm.ArgumentNotNull(pckg, "pckgs");
 
-            var schema = new MSSQLSourceSchema(UnitOfWorkFactory.GetInstance(), GlobalExtractConfiguration.GetInstance());
+            var schema = new MSSQLSourceSchema(UnitOfWorkFactory.GetInstance(), _globalConfig);
 
-            await schema.Init();
+            await schema.Init(token);
 
-            foreach (var pckg in pckgs)
+            foreach (var scriptSource in pckg.Scripts)
             {
-                var builder = new DependencyBuilder(UnitOfWorkFactory.GetInstance(), schema, _log, pckg, GlobalExtractConfiguration.GetInstance());
+                var builder = new DependencyBuilder(UnitOfWorkFactory.GetInstance(), schema, _log, scriptSource, _globalConfig);
 
                 var pTables = await builder.PrepareAsync(token);
                 var sqlBuilder = new MSSqlBuilder();
@@ -64,7 +74,7 @@ namespace ParameterizationExtractor
                 if (!FileService.GetInstance().DirectoryExists(".\\Output"))
                     FileService.GetInstance().CreateDirectory(".\\Output");
 
-                FileService.GetInstance().Save(sqlBuilder.Build(pTables,schema), string.Format(".\\Output\\{0}_p_{1}.sql", pckg.Order, pckg.PackageName));
+                FileService.GetInstance().Save(sqlBuilder.Build(pTables,schema), string.Format(".\\Output\\{0}_p_{1}.sql", scriptSource.Order, scriptSource.ScriptName));
             }
             
             _log.Debug(string.Empty);

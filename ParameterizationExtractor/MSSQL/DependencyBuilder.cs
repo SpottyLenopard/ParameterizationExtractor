@@ -16,9 +16,9 @@ namespace Quipu.ParameterizationExtractor.MSSQL
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly ISourceSchema _schema;
         private readonly ILog _log;
-        private readonly IPackageTemplate _template;
+        private readonly ISourceForScript _template;
         private readonly IExtractConfiguration _configuration;
-        public DependencyBuilder(IUnitOfWorkFactory unitOfWorkFactory, ISourceSchema schema, ILog log, IPackageTemplate template, IExtractConfiguration configuration)
+        public DependencyBuilder(IUnitOfWorkFactory unitOfWorkFactory, ISourceSchema schema, ILog log, ISourceForScript template, IExtractConfiguration configuration)
         {
             Affirm.ArgumentNotNull(unitOfWorkFactory, "unitOfWorkFactory");
             Affirm.ArgumentNotNull(schema, "schema");
@@ -66,8 +66,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                     foreach (var item in await GetRelatedTables(record, cancellationToken))
                     {
-                        if (!_template.Exceptions.Any(_ => _ == item.TableName))
-                            stack.Push(item);
+                        stack.Push(item);
                     }
 
                 }

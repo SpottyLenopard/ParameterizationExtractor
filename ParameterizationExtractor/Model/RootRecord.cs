@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Quipu.ParameterizationExtractor.Model
 {
     public class TableToExtract
     {
+        public TableToExtract() { }
         public TableToExtract(string tableName, ExtractStrategy extractStrategy) : this(tableName, extractStrategy, new SqlBuildStrategy())
         {
 
@@ -28,14 +30,16 @@ namespace Quipu.ParameterizationExtractor.Model
             ExtractStrategy = extractStrategy;
             SqlBuildStrategy = sqlBuildStrategy;
         }
+        [XmlAttribute()]
         public string TableName { get; set; }
 
-        public ExtractStrategy ExtractStrategy { get; private set; }
-        public SqlBuildStrategy SqlBuildStrategy { get; private set; }
+        public ExtractStrategy ExtractStrategy { get; set; }
+        public SqlBuildStrategy SqlBuildStrategy { get; set; }
     }
 
     public class RecordsToExtract 
     {
+        public RecordsToExtract() { }
         public RecordsToExtract(string tableName, string where)
         {
             Affirm.NotNullOrEmpty(tableName, "tableName");          
@@ -43,7 +47,9 @@ namespace Quipu.ParameterizationExtractor.Model
             TableName = tableName;
             Where = where;
         }
+        [XmlAttribute()]
         public string TableName { get; set; }
+        [XmlAttribute()]
         public string Where { get; set; }
 
     }

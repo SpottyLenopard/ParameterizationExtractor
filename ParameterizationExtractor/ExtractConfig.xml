@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-16"?>
+<GlobalExtractConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <FieldsToExclude>
+    <string>CreatorId</string>
+    <string>Created</string>
+  </FieldsToExclude>
+  <UniqueColums>
+    <UniqueColumnsCollection TableName="BusinessProcessSteps" UniqueColumns="BPTypeCode StepStartStatusId StepEndStatusId" />
+    <UniqueColumnsCollection TableName="bpProcessingConditions" UniqueColumns="ConditionText" />
+    <UniqueColumnsCollection TableName="Presentations" UniqueColumns="Name Code" />
+    <UniqueColumnsCollection TableName="FlowDefinitions" UniqueColumns="Code" />
+    <UniqueColumnsCollection TableName="Scripts" UniqueColumns="Code" />
+    <UniqueColumnsCollection TableName="PaymentMessageContent" UniqueColumns="Code" />
+    <UniqueColumnsCollection TableName="BpTypeDefaultExecutionParameters" UniqueColumns="ParameterName BPTypeCode" />
+    <UniqueColumnsCollection TableName="BPAttrTypes" UniqueColumns="Code" />
+    <UniqueColumnsCollection TableName="sys_Parameters" UniqueColumns="ParameterName" />
+    <UniqueColumnsCollection TableName="Cls_PaymentMessageTypes" UniqueColumns="Code" />
+    <UniqueColumnsCollection TableName="PaymentMessageTypeFields" UniqueColumns="Code" />
+    <UniqueColumnsCollection TableName="ServiceJobs" UniqueColumns="Title Description" />
+    <UniqueColumnsCollection TableName="ServiceJobItems" UniqueColumns="MethodName ObjectAssemblyName ObjectTypeName" />
+  </UniqueColums>
+  <DefaultExtractStrategy xsi:type="OnlyChildrenExtractStrategy" ProcessChildren="true" ProcessParents="false">
+    <DependencyToExclude />
+  </DefaultExtractStrategy>
+  <DefaultSqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+</GlobalExtractConfiguration>

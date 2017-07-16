@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Quipu.ParameterizationExtractor.Model
 {
+    [Serializable]
+    [XmlInclude(typeof(FKDependencyExtractStrategy))]
+    [XmlInclude(typeof(OnlyParentExtractStrategy))]
+    [XmlInclude(typeof(OnlyChildrenExtractStrategy))]
+    [XmlInclude(typeof(OnlyOneTableExtractStrategy))]
     public abstract class ExtractStrategy
     {
         protected ExtractStrategy(bool processChildren, bool processParents) : this(processChildren, processParents, new List<string>())
@@ -13,22 +19,24 @@ namespace Quipu.ParameterizationExtractor.Model
         }
 
 
-        protected ExtractStrategy(bool processChildren, bool processParents, IList<string> dependencyToExclue)
+        protected ExtractStrategy(bool processChildren, bool processParents, List<string> dependencyToExclue)
         {
             ProcessChildren = processChildren;
             ProcessParents = processParents;
             DependencyToExclude = dependencyToExclue;
         }
-        public bool ProcessChildren { get; private set; }
-        public bool ProcessParents { get; private set; }       
-        public IList<string> DependencyToExclude { get; private set; }
+        [XmlAttribute()]
+        public bool ProcessChildren { get; set; }
+        [XmlAttribute()]
+        public bool ProcessParents { get; set; }       
+        public List<string> DependencyToExclude { get; set; }
 
     }
 
     public class FKDependencyExtractStrategy: ExtractStrategy
     {
         public FKDependencyExtractStrategy() : base(true, true) { }
-        public FKDependencyExtractStrategy(IList<string> dependencyToExclue) : base(true, true, dependencyToExclue) { }
+        public FKDependencyExtractStrategy(List<string> dependencyToExclue) : base(true, true, dependencyToExclue) { }
     }
 
     public class OnlyParentExtractStrategy : ExtractStrategy

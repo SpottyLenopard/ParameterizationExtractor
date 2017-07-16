@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Quipu.ParameterizationExtractor.Model;
 using System.Data.SqlClient;
 using System.Data;
+using System.Threading;
 
 namespace Quipu.ParameterizationExtractor.MSSQL
 {
@@ -160,7 +161,7 @@ order by C.column_id
             return Tables.First(_ => _.TableName == tableName);
         }
 
-        public async Task Init()
+        public async Task Init(CancellationToken cancellationToken)
         {
             var sourceInfo = Task.Run<Tuple<string, string>>(() => {
                 using (var uow = _uowFactory.GetUnitOfWork())
@@ -168,8 +169,8 @@ order by C.column_id
                     return new Tuple<string, string>(uow.Database, uow.DataSource);
                 }
             });
-            var dTables = GetDependentTables();
-            var MetaData = GetMetaData(new MetaDataInitializer());
+            var dTables = GetDependentTables(cancellationToken);
+            var MetaData = GetMetaData(new MetaDataInitializer(), cancellationToken);
             await Task.WhenAll(dTables, MetaData, sourceInfo);
 
             _dependentTables = dTables.Result;
@@ -180,12 +181,12 @@ order by C.column_id
             WasInit = true;
         }
 
-        private async Task<IEnumerable<PDependentTable>> GetDependentTables()
+        private async Task<IEnumerable<PDependentTable>> GetDependentTables(CancellationToken cancellationToken)
         {
             var result = new List<PDependentTable>();
 
             using (var uof = _uowFactory.GetUnitOfWork())
-            using (var dr = await uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlFKs))
+            using (var dr = await uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlFKs, cancellationToken))
             {
                 var dt = new DataTable();
                 dt.Load(dr);
@@ -208,15 +209,15 @@ order by C.column_id
             return result;
         }
 
-        private async Task<IEnumerable<PTableMetadata>> GetMetaData(IMetaDataInitializer initializer)
+        private async Task<IEnumerable<PTableMetadata>> GetMetaData(IMetaDataInitializer initializer, CancellationToken cancellationToken)
         {
             var result = new List<PTableMetadata>();
 
             using (var uof = _uowFactory.GetUnitOfWork())
             {
-                var metaTables = uof.GetSchemaAsync("Tables");
+                var metaTables = uof.GetSchemaAsync("Tables", cancellationToken);
 
-                var metaColumns = uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlPKColumns);
+                var metaColumns = uof.ExecuteReaderAsync(MSSQLSourceSchema.sqlPKColumns, cancellationToken);
 
                 await Task.WhenAll(metaColumns, metaTables);
 
@@ -237,9 +238,11 @@ order by C.column_id
                         pTab.Add(field);
 
                     }
-                    UniqueColumnsCollection uniqueColumns = null;
-                    if (_globalConfiguration.UniqueColums.TryGetValue(pTab.TableName, out uniqueColumns))
-                        pTab.UniqueColumnsCollection.AddRange(uniqueColumns);
+
+                    var uqCol = _globalConfiguration.UniqueColums.FirstOrDefault(_ => _.TableName == pTab.TableName);
+
+                    if (uqCol != null)
+                        pTab.UniqueColumnsCollection = new List<string>(uqCol.UniqueColumns);
 
                     result.Add(pTab);
                 }

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-16"?>
+<Package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Scripts>
+    <SourceForScript Order="10" ScriptName="_IMT_SWIFT_103_INC2">
+      <RootRecords>
+        <RecordsToExtract TableName="BusinessProcessesTypes" Where="bptypecode = '_IMT_SWIFT_103_INC2'" />
+      </RootRecords>
+      <TablesToProcess>
+        <TableToExtract TableName="BusinessProcessSteps">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="BpTypeStepPresentations">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude>
+              <string>BusinessProcessSteps</string>
+            </DependencyToExclude>
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="Presentations">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="true" NoInserts="true" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="Scripts">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="BPTransactionTemplates">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="bpProcessingConditions">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="BpTypes4PaymentSystems">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude>
+              <string>BusinessProcessesTypes</string>
+            </DependencyToExclude>
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="BpTypeDefaultExecutionParameters">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude>
+              <string>BusinessProcessesTypes</string>
+            </DependencyToExclude>
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="BPAttrTypes">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude>
+              <string>BusinessProcessesTypes</string>
+            </DependencyToExclude>
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="GlobalParameters">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="true" NoInserts="true" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="sys_Parameters">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="true" NoInserts="true" AsIsInserts="false" />
+        </TableToExtract>
+      </TablesToProcess>
+    </SourceForScript>
+    <SourceForScript Order="0" ScriptName="Presentations">
+      <RootRecords>
+        <RecordsToExtract TableName="Presentations" Where="" />
+      </RootRecords>
+      <TablesToProcess>
+        <TableToExtract TableName="PresentationValidationRules">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+      </TablesToProcess>
+    </SourceForScript>
+    <SourceForScript Order="5" ScriptName="Scripts">
+      <RootRecords>
+        <RecordsToExtract TableName="Scripts" Where="" />
+      </RootRecords>
+      <TablesToProcess />
+    </SourceForScript>
+    <SourceForScript Order="4" ScriptName="SchedulesAndChains">
+      <RootRecords>
+        <RecordsToExtract TableName="ServiceJobItems" Where="[Title] in (&#xD;&#xA;                'SWIFT SE processor',&#xD;&#xA;                'SWIFT SE Parse inc TB',&#xD;&#xA;                'SWIFT SE Concat4AML',&#xD;&#xA;                'SWIFT SE Push2AML',&#xD;&#xA;                'SWIFT SE PushAfterAML')" />
+      </RootRecords>
+      <TablesToProcess>
+        <TableToExtract TableName="ServiceJobs">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="ServiceJobItems">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="ServiceJobSchedules">
+          <ExtractStrategy xsi:type="OnlyChildrenExtractStrategy" ProcessChildren="true" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="ServiceJobItemRelations">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="ServiceJobScheduleParameters">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+      </TablesToProcess>
+    </SourceForScript>
+    <SourceForScript Order="3" ScriptName="PaymentMessageTypeFields">
+      <RootRecords>
+        <RecordsToExtract TableName="PaymentMessageTypeFields" Where="" />
+      </RootRecords>
+      <TablesToProcess>
+        <TableToExtract TableName="PaymentMessageContent">
+          <ExtractStrategy xsi:type="FKDependencyExtractStrategy" ProcessChildren="true" ProcessParents="true">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="false" />
+        </TableToExtract>
+        <TableToExtract TableName="Cls_PaymentMessageTypes">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="true" NoInserts="true" AsIsInserts="false" />
+        </TableToExtract>
+      </TablesToProcess>
+    </SourceForScript>
+    <SourceForScript Order="2" ScriptName="FlowDefinitions">
+      <RootRecords>
+        <RecordsToExtract TableName="FlowDefinitions" Where="Code = '_IMT_SWIFT_103_INC2'" />
+      </RootRecords>
+      <TablesToProcess />
+    </SourceForScript>
+    <SourceForScript Order="9" ScriptName="GlobalParameters">
+      <RootRecords>
+        <RecordsToExtract TableName="GlobalParameters" Where="Code in ('SSERootDir')" />
+        <RecordsToExtract TableName="sys_Parameters" Where="ParameterName in ('StateMachine','SwiftReason')" />
+      </RootRecords>
+      <TablesToProcess />
+    </SourceForScript>
+    <SourceForScript Order="1" ScriptName="Cls_BPStatuses">
+      <RootRecords>
+        <RecordsToExtract TableName="Cls_BPStatuses" Where="BPStatusId between 20 and 41" />
+      </RootRecords>
+      <TablesToProcess>
+        <TableToExtract TableName="Cls_BPStatuses">
+          <ExtractStrategy xsi:type="OnlyOneTableExtractStrategy" ProcessChildren="false" ProcessParents="false">
+            <DependencyToExclude />
+          </ExtractStrategy>
+          <SqlBuildStrategy ThrowExecptionIfNotExists="false" NoInserts="false" AsIsInserts="true" />
+        </TableToExtract>
+      </TablesToProcess>
+    </SourceForScript>
+  </Scripts>
+</Package>

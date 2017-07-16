@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Quipu.ParameterizationExtractor.Interfaces
@@ -13,7 +14,7 @@ namespace Quipu.ParameterizationExtractor.Interfaces
         IEnumerable<PDependentTable> DependentTables { get; }
         PTableMetadata GetTableMetaData(string tableName);
         bool WasInit { get; }
-        Task Init();
+        Task Init(CancellationToken cancellationToken);
         string Database { get; }
         string DataSource { get; }
     }
