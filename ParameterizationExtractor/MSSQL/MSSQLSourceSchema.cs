@@ -8,9 +8,11 @@ using Quipu.ParameterizationExtractor.Model;
 using System.Data.SqlClient;
 using System.Data;
 using System.Threading;
+using System.ComponentModel.Composition;
 
 namespace Quipu.ParameterizationExtractor.MSSQL
 {
+    [Export(typeof(ISourceSchema))]
     public class MSSQLSourceSchema : ISourceSchema
     {
         public static string sqlFKs = @"        
@@ -89,6 +91,8 @@ order by C.column_id
         private IEnumerable<PTableMetadata> _tables;
         private IUnitOfWorkFactory _uowFactory;
         private IExtractConfiguration _globalConfiguration;
+
+        [ImportingConstructor]
         public MSSQLSourceSchema(IUnitOfWorkFactory uowf, IExtractConfiguration globalConfiguration)
         {
             Affirm.ArgumentNotNull(uowf, "uowf");

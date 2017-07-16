@@ -6,9 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Quipu.ParameterizationExtractor.Model;
 using System.Data;
+using System.ComponentModel.Composition;
 
 namespace Quipu.ParameterizationExtractor.MSSQL
 {
+    [Export]
     public class MetaDataInitializer : IMetaDataInitializer
     {
         private readonly Dictionary<string, Type> sqlToNetTypes = new Dictionary<string, Type>();

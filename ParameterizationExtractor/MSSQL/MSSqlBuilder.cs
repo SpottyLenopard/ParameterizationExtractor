@@ -6,9 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Quipu.ParameterizationExtractor.Model;
 using Quipu.ParameterizationExtractor.Templates;
+using System.ComponentModel.Composition;
 
 namespace Quipu.ParameterizationExtractor.MSSQL
 {
+    [Export(typeof(ISqlBuilder))]
     public class MSSqlBuilder : ISqlBuilder
     {
         public string Build(IEnumerable<PRecord> tables, ISourceSchema schema)

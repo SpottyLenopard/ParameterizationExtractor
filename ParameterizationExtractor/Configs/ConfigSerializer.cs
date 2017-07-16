@@ -3,6 +3,7 @@ using Quipu.ParameterizationExtractor.Interfaces;
 using Quipu.ParameterizationExtractor.Model;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ using System.Xml.Serialization;
 
 namespace Quipu.ParameterizationExtractor.Configs
 {
-    public class ConfigSerializer : SingletonBase<ConfigSerializer>, ICanSerializeConfigs
+    public class ConfigSerializer : ICanSerializeConfigs
     {
         private const string _pathToGlobalConfig = @"ExtractConfig.xml";
         public IExtractConfiguration GetGlobalConfig()

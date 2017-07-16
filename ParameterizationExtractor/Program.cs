@@ -18,19 +18,15 @@ namespace ParameterizationExtractor
 {
     public class Program
     {
-        private static ILog _log;
-        private static IExtractConfiguration _globalConfig;
         static void Main(string[] args)
         {
-            _log = new ConsoleLogger();
             if (!args.Any())
             {
-                _log.DebugFormat("Please specify path to package, usage ParameterizationExtractor.exe [path-to-package]");
+                Console.Write("Please specify path to package, usage ParameterizationExtractor.exe [path-to-package]");
                 Console.ReadKey();
                 return;
             }
             
-            _globalConfig = ConfigSerializer.GetInstance().GetGlobalConfig();
             CancellationTokenSource cts = new CancellationTokenSource();
 
             System.Console.CancelKeyPress += (s, e) =>
@@ -38,12 +34,16 @@ namespace ParameterizationExtractor
                 e.Cancel = true;
                 cts.Cancel();
             };
-
+            var _log = AppBootstrap.Container.GetExportedValue<ILog>();
             try
             {
-                var pckg = ConfigSerializer.GetInstance().GetPackage(args[0]);
+                var bootstraper = new AppBootstrap();
+                bootstraper.Init(cts.Token).GetAwaiter().GetResult();
 
-                MainAsync(pckg, cts.Token)
+                var pckg = AppBootstrap.Container.GetExportedValue<ICanSerializeConfigs>().GetPackage(args[0]);
+                var pckgProcessor = AppBootstrap.Container.GetExportedValue<PackageProcessor>();
+
+                pckgProcessor.ExecuteAsync(cts.Token, pckg)
                     .GetAwaiter()
                     .GetResult();
             }
@@ -56,29 +56,6 @@ namespace ParameterizationExtractor
         }
 
         
-        static async Task MainAsync(IPackage pckg, CancellationToken token)
-        {
-            Affirm.ArgumentNotNull(pckg, "pckgs");
-
-            var schema = new MSSQLSourceSchema(UnitOfWorkFactory.GetInstance(), _globalConfig);
-
-            await schema.Init(token);
-
-            foreach (var scriptSource in pckg.Scripts)
-            {
-                var builder = new DependencyBuilder(UnitOfWorkFactory.GetInstance(), schema, _log, scriptSource, _globalConfig);
-
-                var pTables = await builder.PrepareAsync(token);
-                var sqlBuilder = new MSSqlBuilder();
-
-                if (!FileService.GetInstance().DirectoryExists(".\\Output"))
-                    FileService.GetInstance().CreateDirectory(".\\Output");
-
-                FileService.GetInstance().Save(sqlBuilder.Build(pTables,schema), string.Format(".\\Output\\{0}_p_{1}.sql", scriptSource.Order, scriptSource.ScriptName));
-            }
-            
-            _log.Debug(string.Empty);
-        }
     
         
     }

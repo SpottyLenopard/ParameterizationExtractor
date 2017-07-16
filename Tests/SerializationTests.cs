@@ -16,13 +16,13 @@ namespace Tests
         {
             var pkg = TestPackages.Get();
 
-            var s = ConfigSerializer.GetInstance().SerializePackage(pkg);
+            var s = new ConfigSerializer();
 
             XmlSerializer serializer = new XmlSerializer(typeof(GlobalExtractConfiguration));
 
             using (var writer = new StringWriter())
             {
-                serializer.Serialize(writer, ConfigSerializer.GetInstance().GetGlobalConfig());
+                serializer.Serialize(writer, s.GetGlobalConfig());
                 var g = writer.ToString();
             }
         }

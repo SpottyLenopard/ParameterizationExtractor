@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -49,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppBootstrap.cs" />
     <Compile Include="Common\Affirm.cs" />
     <Compile Include="Common\Exceptions.cs" />
     <Compile Include="Common\Extensions.cs" />
@@ -70,7 +72,7 @@
     <Compile Include="Interfaces\ISqlBuilder.cs" />
     <Compile Include="Interfaces\IUnitOfWork.cs" />
     <Compile Include="Model\ExtractStrategy.cs" />
-    <Compile Include="Interfaces\GlobalExtractConfiguration.cs" />
+    <Compile Include="Model\GlobalExtractConfiguration.cs" />
     <Compile Include="Configs\SourceForScript.cs" />
     <Compile Include="Model\PMetadata.cs" />
     <Compile Include="Model\PTable.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="MSSQL\MSSQLSourceSchema.cs" />
     <Compile Include="MSSQL\UnitOfWork.cs" />
     <Compile Include="MSSQL\UnitOfWorkFactory.cs" />
+    <Compile Include="PackageProcessor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Templates\DefaultTemplate.cs">

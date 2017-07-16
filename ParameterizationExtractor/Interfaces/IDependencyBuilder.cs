@@ -10,7 +10,7 @@ namespace Quipu.ParameterizationExtractor.Interfaces
 {
     public interface IDependencyBuilder
     {
-        Task<IEnumerable<PRecord>> PrepareAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<PRecord>> PrepareAsync(CancellationToken cancellationToken, ISourceForScript template);
     }
      
 }

@@ -8,42 +8,44 @@ using Quipu.ParameterizationExtractor.Model;
 using Quipu.ParameterizationExtractor.Common;
 using ParameterizationExtractor;
 using System.Threading;
+using System.ComponentModel.Composition;
 
 namespace Quipu.ParameterizationExtractor.MSSQL
 {
+    [Export(typeof(IDependencyBuilder))]
     public class DependencyBuilder : IDependencyBuilder
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly ISourceSchema _schema;
         private readonly ILog _log;
-        private readonly ISourceForScript _template;
+        //private readonly ISourceForScript _template;
         private readonly IExtractConfiguration _configuration;
-        public DependencyBuilder(IUnitOfWorkFactory unitOfWorkFactory, ISourceSchema schema, ILog log, ISourceForScript template, IExtractConfiguration configuration)
+
+        [ImportingConstructor]
+        public DependencyBuilder(IUnitOfWorkFactory unitOfWorkFactory, ISourceSchema schema, ILog log, IExtractConfiguration configuration)
         {
             Affirm.ArgumentNotNull(unitOfWorkFactory, "unitOfWorkFactory");
             Affirm.ArgumentNotNull(schema, "schema");
             Affirm.ArgumentNotNull(log, "log");
-            Affirm.ArgumentNotNull(template, "template");
             Affirm.ArgumentNotNull(configuration, "configuration");
 
             _unitOfWorkFactory = unitOfWorkFactory;
             _schema = schema;
             _log = log;
-            _template = template;
             _configuration = configuration;
         }
 
         private HashSet<PRecord> processedTables;
 
-        public async Task<IEnumerable<PRecord>> PrepareAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<PRecord>> PrepareAsync(CancellationToken cancellationToken, ISourceForScript template)
         {
             processedTables = new HashSet<PRecord>();
             var stack = new Stack<PRecord>();
 
-            foreach (var root in _template.RootRecords)
+            foreach (var root in template.RootRecords)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                foreach (var rootTable in await GetPTables(root.TableName, root.Where,cancellationToken))
+                foreach (var rootTable in await GetPTables(root.TableName, root.Where,cancellationToken,template))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     if (rootTable != null)
@@ -64,7 +66,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                 {
                     processedTables.Add(record);
 
-                    foreach (var item in await GetRelatedTables(record, cancellationToken))
+                    foreach (var item in await GetRelatedTables(record, cancellationToken,template))
                     {
                         stack.Push(item);
                     }
@@ -76,21 +78,21 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return processedTables.Where(_ => _.IsStartingPoint).ToList();
         }
 
-        private ExtractStrategy GetExtractStrategy(string tableName)
+        private ExtractStrategy GetExtractStrategy(string tableName, ISourceForScript template)
         {
-            var fromTemplate = _template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.ExtractStrategy;
+            var fromTemplate = template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.ExtractStrategy;
 
             return fromTemplate ?? _configuration.DefaultExtractStrategy;
         }
 
-        private SqlBuildStrategy GetSqlBuildStrategy(string tableName)
+        private SqlBuildStrategy GetSqlBuildStrategy(string tableName, ISourceForScript template)
         {
-            var fromTemplate = _template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.SqlBuildStrategy;
+            var fromTemplate = template.TablesToProcess.FirstOrDefault(_ => _.TableName == tableName)?.SqlBuildStrategy;
 
             return fromTemplate ?? _configuration.DefaultSqlBuildStrategy;
         }
 
-        private async Task<IEnumerable<PRecord>> GetRelatedTables(PRecord table, CancellationToken cancellationToken)
+        private async Task<IEnumerable<PRecord>> GetRelatedTables(PRecord table, CancellationToken cancellationToken, ISourceForScript template)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var result = new List<PRecord>();
@@ -102,12 +104,12 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 _log.DebugFormat("parent table: {0} referenced table {1}", item.ParentTable, item.ReferencedTable);
-                var extractStrategy = GetExtractStrategy(table.TableName);
+                var extractStrategy = GetExtractStrategy(table.TableName, template);
 
                 Func<string, string, string, Task<IEnumerable<PRecord>>> insertTable = async (tableName, columnName, pkColumn) =>
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (!_template.TablesToProcess.Any(_ => _.TableName == tableName))
+                    if (!template.TablesToProcess.Any(_ => _.TableName == tableName))
                         return await Task.FromResult<IEnumerable<PRecord>>(null);
 
                     if (extractStrategy.DependencyToExclude.Any(_ => _ == tableName))
@@ -117,7 +119,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                     if (value != null)
                     {
                         var str = string.Format("{0} = {1}", pkColumn, value);
-                        return await GetPTables(tableName, str,cancellationToken);
+                        return await GetPTables(tableName, str,cancellationToken,template);
                     }
 
                     return await Task.FromResult<IEnumerable<PRecord>>(null);
@@ -152,7 +154,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
             return result;
         }
 
-        public async Task<PRecord> GetPTable(string tableName, string objectId, CancellationToken cancellationToken)
+        public async Task<PRecord> GetPTable(string tableName, string objectId, CancellationToken cancellationToken, ISourceForScript template)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -175,14 +177,14 @@ namespace Quipu.ParameterizationExtractor.MSSQL
 
                 while (reader.Read())
                 {
-                    result.Add(new PRecord(reader, tableMetaData) { Source = sql.Trim(), ExtractStrategy = GetExtractStrategy(tableName), SqlBuildStrategy = GetSqlBuildStrategy(tableName) });
+                    result.Add(new PRecord(reader, tableMetaData) { Source = sql.Trim(), ExtractStrategy = GetExtractStrategy(tableName,template), SqlBuildStrategy = GetSqlBuildStrategy(tableName,template) });
                 }
             }
 
             return result.FirstOrDefault();
         }
 
-        public async Task<IEnumerable<PRecord>> GetPTables(string tableName, string where, CancellationToken cancellationToken)
+        public async Task<IEnumerable<PRecord>> GetPTables(string tableName, string where, CancellationToken cancellationToken, ISourceForScript template)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var result = new List<PRecord>();
@@ -200,7 +202,7 @@ namespace Quipu.ParameterizationExtractor.MSSQL
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var record = new PRecord(reader, _schema.GetTableMetaData(tableName)) { Source = sql.Trim(), ExtractStrategy = GetExtractStrategy(tableName) , SqlBuildStrategy = GetSqlBuildStrategy(tableName) };
+                    var record = new PRecord(reader, _schema.GetTableMetaData(tableName)) { Source = sql.Trim(), ExtractStrategy = GetExtractStrategy(tableName,template) , SqlBuildStrategy = GetSqlBuildStrategy(tableName,template) };
                     var processed = processedTables.FirstOrDefault(_ => _.Equals(record));     
                     result.Add(processed ?? record);
                 }

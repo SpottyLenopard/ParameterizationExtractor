@@ -2,6 +2,7 @@
 using Quipu.ParameterizationExtractor.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Configuration;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,8 @@ using System.Threading.Tasks;
 
 namespace Quipu.ParameterizationExtractor.MSSQL
 {
-    public class UnitOfWorkFactory : SingletonBase<UnitOfWorkFactory>, IUnitOfWorkFactory
+    [Export(typeof(IUnitOfWorkFactory))]
+    public class UnitOfWorkFactory : IUnitOfWorkFactory
     {
         public IUnitOfWork GetUnitOfWork(string source)
         {
