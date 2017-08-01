@@ -1,0 +1,24 @@
+﻿{
+  "globalExtractConfig": {
+    "FieldsToExclude": [ "CreatorId", "Created", "ChangerId", "Changed" ],
+    "UniqueColums": [
+      {
+        "TableName": "BusinessProcessSteps",
+        "UniqueColumns": [ "BPTypeCode", "StepStartStatusId", "StepEndStatusId" ]
+      },
+      {
+        "TableName": "bpProcessingConditions",
+        "UniqueColumns": [ "ConditionText" ]
+      }
+    ],
+    "DefaultExtractStrategy": {
+      "ProcessChildren": "true",
+      "ProcessParents": "true"
+    },
+    "DefaultSqlBuildStrategy": {
+      "ThrowExecptionIfNotExists": "false",
+      "NoInserts": "false",
+      "AsIsInserts": "false"
+    }
+  }
+}

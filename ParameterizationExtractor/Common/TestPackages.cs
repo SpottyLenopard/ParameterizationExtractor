@@ -1,6 +1,6 @@
-﻿using Quipu.ParameterizationExtractor.Configs;
-using Quipu.ParameterizationExtractor.Interfaces;
-using Quipu.ParameterizationExtractor.Model;
+﻿using Quipu.ParameterizationExtractor.Logic.Configs;
+using Quipu.ParameterizationExtractor.Logic.Interfaces;
+using Quipu.ParameterizationExtractor.Logic.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;

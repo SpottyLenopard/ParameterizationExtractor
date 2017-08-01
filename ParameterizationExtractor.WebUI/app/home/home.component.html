@@ -1,0 +1,18 @@
+﻿<h1>I am home component</h1>
+<input [(ngModel)]="connectionString"> <br/>
+<input [(ngModel)]="tableName">
+<button class="btn btn-lg btn-primary btn-block" (click)="getTable()">Test - get parent\children tables</button>
+<p> Result:</p>
+<ul>
+    <li *ngFor="let item of result">
+        {{ item.name }}
+    </li>
+</ul>
+<button class="btn btn-lg btn-primary btn-block" (click)="getMetaTable()">Test2 - get table metadata</button>
+<p> Table MetaData {{result2?.tableName}}</p>
+<ul>
+    <li *ngFor="let item of result2">
+        {{ item.fieldName }}
+    </li>
+</ul>
+<button class="btn btn-lg btn-primary btn-block" (click)="executePack()">Test3 - execute package</button>

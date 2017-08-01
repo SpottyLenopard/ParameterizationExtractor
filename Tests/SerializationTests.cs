@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Quipu.ParameterizationExtractor.Common;
 using Quipu.ParameterizationExtractor.Configs;
 using System.Xml.Serialization;
-using Quipu.ParameterizationExtractor.Model;
+using Quipu.ParameterizationExtractor.Logic.Model;
 using System.IO;
 
 namespace Tests

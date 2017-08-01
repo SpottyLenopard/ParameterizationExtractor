@@ -1,6 +1,7 @@
-﻿using Quipu.ParameterizationExtractor.Common;
+﻿using Fclp;
+using Quipu.ParameterizationExtractor.Common;
 using Quipu.ParameterizationExtractor.Configs;
-using Quipu.ParameterizationExtractor.Interfaces;
+using Quipu.ParameterizationExtractor.Logic.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -14,39 +15,76 @@ using System.Threading.Tasks;
 
 namespace Quipu.ParameterizationExtractor
 {
-    public class AppBootstrap
+    public class AppArgs : IAppArgs
     {
-        private readonly static Lazy<CompositionContainer> _container = new Lazy<CompositionContainer>(() => GetConfiguredContainer());
-
-        public AppBootstrap()
+        public AppArgs()
         {
-            
+           
         }
 
-        public async Task Init(CancellationToken token)
+        public string ConnectionString { get; set; }
+        public string PathToPackage { get; set;  }
+        public string ConnectionName { get; set; }
+        public string OutputFolder { get; set; }
+
+        public static IAppArgs GetAppArgs()
         {
-            var schema = Container.GetExportedValue<ISourceSchema>();
-            await schema.Init(token);
-        } 
+            var p = new FluentCommandLineParser<AppArgs>();
 
-        public static CompositionContainer Container { get { return _container.Value; } }
+            p.Setup<string>(_ => _.ConnectionName)
+                .As('n', "connectionName")
+                .SetDefault("SourceDB");
 
+            p.Setup<string>(_ => _.PathToPackage)
+                .As('p', "package")
+                .WithDescription("Path extraction package")
+                .Required();
+
+            p.Setup<string>(_ => _.ConnectionString)
+                .As('c', "connectionString");
+
+            p.Setup<string>(_ => _.OutputFolder)
+                .As('o', "outputFolder")
+                .SetDefault("Output");
+
+            p.Parse(Environment.GetCommandLineArgs());
+
+            return p.Object;
+        }
+    }
+
+    public static class DI
+    {
+        private readonly static Lazy<CompositionContainer> _container = new Lazy<CompositionContainer>(() => GetConfiguredContainer());
         private static CompositionContainer GetConfiguredContainer()
         {
-            var asm = Assembly.GetAssembly(typeof(AppBootstrap));
-            var catalog = new AssemblyCatalog(asm);
-            var container = new CompositionContainer(catalog);
+            var catalog = new AggregateCatalog(new AssemblyCatalog(typeof(AppArgs).Assembly), new AssemblyCatalog(typeof(IUnitOfWork).Assembly));
+            var container = new CompositionContainer(catalog, true); // thread safe ha!
             var batch = new CompositionBatch();
             var ser = new ConfigSerializer();
 
+            batch.AddExportedValue<IAppArgs>(AppArgs.GetAppArgs());
             batch.AddExportedValue<ICanSerializeConfigs>(ser);
             batch.AddExportedValue<IExtractConfiguration>(ser.GetGlobalConfig());
             batch.AddExportedValue<ILog>(new ConsoleLogger());
             batch.AddExportedValue<IFileService>(new FileService());
-
+            
             container.Compose(batch);
 
             return container;
         }
+       
+        private static CompositionContainer Container { get { return _container.Value; } }
+
+        public static T GetInstance<T>()
+        {
+            return Container.GetExportedValue<T>();
+        }
+
+        public static T GetInstance<T>(string key)
+        {
+            return Container.GetExportedValue<T>(key);
+        }
     }
+   
 }

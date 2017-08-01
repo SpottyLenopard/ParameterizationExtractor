@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <base href="/">
+    <title>Excavator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/bootstrap.css" rel="stylesheet" media="screen">
+    <!--link rel="stylesheet" href="src/css/busy.css"-->
+    <!--link rel="stylesheet" href="styles.css"-->
+
+    <!-- IE required polyfills, in this exact order -->
+    <script src="js/shim.min.js"></script>
+    <script src="js/zone.js"></script>
+    <script src="js/system.src.js"></script>
+    <script src="js/Reflect.js"></script>
+
+    <script src="systemjs.config.js"></script>
+    <script>
+      System.import('app').catch(function(err){ console.error(err); });
+    </script>
+</head>
+
+<body>
+    <my-app>Loading...</my-app>
+</body>
+    
+</html>

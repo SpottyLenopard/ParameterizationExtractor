@@ -1,4 +1,4 @@
-﻿using Quipu.ParameterizationExtractor.Interfaces;
+﻿using Quipu.ParameterizationExtractor.Logic.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

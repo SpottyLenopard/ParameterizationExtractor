@@ -17,6 +17,10 @@
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
     <TargetFrameworkProfile />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,6 +60,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ParameterizationExtractor.Logic\ParameterizationExtractor.Logic.csproj">
+      <Project>{86ACD68B-CCA0-4FA8-A15E-51CE122544A9}</Project>
+      <Name>ParameterizationExtractor.Logic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ParameterizationExtractor\ParameterizationExtractor.csproj">
       <Project>{1795fa30-2e41-45b8-b6a5-8e0d865398f6}</Project>
       <Name>ParameterizationExtractor</Name>
