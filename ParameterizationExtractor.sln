@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParameterizationExtractor", "ParameterizationExtractor\ParameterizationExtractor.csproj", "{1795FA30-2E41-45B8-B6A5-8E0D865398F6}"
 EndProject
@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParameterizationExtractor.L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParameterizationExtractor.Common", "ParameterizationExtractor.Common\ParameterizationExtractor.Common.csproj", "{75838696-C44F-4A2D-ADFA-F6E5D518581A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ParameterizationExtractor.WebUI", "ParameterizationExtractor.WebUI\ParameterizationExtractor.WebUI.xproj", "{F5F7E366-814E-47D8-A292-F97CF56A98E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParameterizationExtractor.WebUI", "ParameterizationExtractor.WebUI\ParameterizationExtractor.WebUI.csproj", "{F5F7E366-814E-47D8-A292-F97CF56A98E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,26 +42,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://quid12bptfs01:8080/tfs/vm-tfskiev-migrated
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = ParameterizationExtractor\\ParameterizationExtractor.csproj
-		SccProjectName1 = ParameterizationExtractor
-		SccLocalPath1 = ParameterizationExtractor
-		SccProjectUniqueName2 = Tests\\Tests.csproj
-		SccProjectName2 = Tests
-		SccLocalPath2 = Tests
-		SccProjectUniqueName3 = ParameterizationExtractor.Logic\\ParameterizationExtractor.Logic.csproj
-		SccProjectName3 = ParameterizationExtractor.Logic
-		SccLocalPath3 = ParameterizationExtractor.Logic
-		SccProjectUniqueName4 = ParameterizationExtractor.Common\\ParameterizationExtractor.Common.csproj
-		SccProjectName4 = ParameterizationExtractor.Common
-		SccLocalPath4 = ParameterizationExtractor.Common
-		SccProjectUniqueName5 = ParameterizationExtractor.WebUI\\ParameterizationExtractor.WebUI.xproj
-		SccProjectName5 = ParameterizationExtractor.WebUI
-		SccLocalPath5 = ParameterizationExtractor.WebUI
 	EndGlobalSection
 EndGlobal

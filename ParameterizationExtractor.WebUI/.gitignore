@@ -1,5 +1,6 @@
 wwwroot/**
-app/**.js
-app/**.js.map
+app/**/*.js
+app/**/*.js.map
 project.lock.json
 project.fragment.lock.json
+.temp/**
