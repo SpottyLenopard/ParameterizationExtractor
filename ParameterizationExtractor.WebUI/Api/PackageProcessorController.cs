@@ -57,28 +57,32 @@ namespace ParameterizationExtractor.WebUI.Api
 
             _log.Debug("Finished processing of package.");
 
-            return new FileContentResult(PrepareContent(tasks.Select(_ => _.Result)), new MediaTypeHeaderValue("application/zip"))
+            return new FileContentResult(await PrepareStream(tasks.Select(_ => _.Result)), new MediaTypeHeaderValue("application/zip"))
             {
                 FileDownloadName = "scripts.zip"
             };
         }
 
-        private byte[] PrepareContent(IEnumerable<Tuple<string, string>> content)
+        private async Task<byte[]> PrepareStream(IEnumerable<Tuple<string, string>> content)
         {
-            using (var zipStream = new MemoryStream())
-            using (ZipArchive zip = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+            var zipStream = new MemoryStream();
+
+            using (var zip = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
             {
                 foreach (var t in content)
                 {
                     var zipEntry = zip.CreateEntry(t.Item2);
                     using (var writer = new StreamWriter(zipEntry.Open()))
                     {
-                        writer.Write(t.Item1);
+                        await writer.WriteAsync(t.Item1);
                     }
-                }
-
-                return zipStream.ToArray();
+                }              
             }
+
+            var b = zipStream.ToArray();
+            zipStream.Dispose();
+
+            return b;
         }
     }
 }
