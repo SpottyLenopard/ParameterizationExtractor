@@ -51,9 +51,7 @@ export class apiService {
         return this.http
             .post(this.api + 'PackageProcessor/Execute', pack, opt)
             .map(response => {
-                //let file = response.blob();
-
-                return new Blob([response.text()], { type: "application/zip" });
+                return new Blob([response.blob()], { type: "application/zip" });
             });
     }   
 }

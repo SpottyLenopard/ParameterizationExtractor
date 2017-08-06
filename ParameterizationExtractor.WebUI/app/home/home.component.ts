@@ -5,7 +5,7 @@ import { pTableMetadata } from '../shared/model/pTableMetadata';
 import { scriptsPackage } from '../shared/model/scriptsPackage';
 import { sourceForScript } from '../shared/model/sourceForScript';
 import { recordsToExtract, tableToExtract } from '../shared/model/recordsToExtract';
-import 'rxjs/Rx';
+import { saveAs } from 'file-saver';
 
 @Component({
     moduleId: module.id,
@@ -47,8 +47,7 @@ export class HomeComponent {
 
         this.service.executePackage(this.connectionString, p).subscribe((b) => {
 
-            let url = window.URL.createObjectURL(b);
-            window.open(url);
+            saveAs(b, "test.zip");
 
         });
     }

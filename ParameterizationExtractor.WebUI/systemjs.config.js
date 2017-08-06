@@ -30,7 +30,8 @@
             'angular2-dynamic-component': 'npm:angular2-dynamic-component',
             'angular2-busy': 'npm:angular2-busy',
             'core-js': 'npm:core-js',
-            'angular2-logger': 'npm:angular2-logger'
+            'angular2-logger': 'npm:angular2-logger',
+            'file-saver': 'npm:'
         },
         // packages tells the System loader how to load when no filename and/or no extension
         packages: {
@@ -52,7 +53,11 @@
                 defaultExtension: 'js'
             },
             'angular2-logger':            { defaultExtension: 'js' },
-            'core-js': { main: 'index.js', defaultExtension: 'js' }
+            'core-js': { main: 'index.js', defaultExtension: 'js' },
+            "file-saver": {
+                "main": "./FileSaver.js",
+                "format": "cjs"
+            }
         }
     });
 })(this);
