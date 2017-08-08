@@ -14,7 +14,8 @@ module.exports = {
             "node_modules/jquery/dist/jquery.js",
             "node_modules/bootstrap/dist/js/bootstrap.js",
             "node_modules/@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js",
-            "node_modules/ng2-charts/bundles/ng2-charts.umd.js"
+            "node_modules/ng2-charts/bundles/ng2-charts.umd.js",
+            "node_modules/file-saver/FileSaver.js"
         ],
         cssFiles: [
             "node_modules/bootstrap/dist/css/bootstrap.css",

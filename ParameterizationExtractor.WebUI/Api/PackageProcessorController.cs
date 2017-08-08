@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Quipu.ParameterizationExtractor.Common;
 using Quipu.ParameterizationExtractor.Logic.Configs;
 using Quipu.ParameterizationExtractor.Logic.Interfaces;
@@ -56,27 +57,32 @@ namespace ParameterizationExtractor.WebUI.Api
 
             _log.Debug("Finished processing of package.");
 
-            return File(PrepareStream(tasks.Select(_ => _.Result)), "application/zip", "scripts.zip");
-            //return tasks.Select(_ => _.Result).ToList();
+            return new FileContentResult(await PrepareStream(tasks.Select(_ => _.Result)), new MediaTypeHeaderValue("application/zip"))
+            {
+                FileDownloadName = "scripts.zip"
+            };
         }
 
-        private Stream PrepareStream(IEnumerable<Tuple<string, string>> content)
+        private async Task<byte[]> PrepareStream(IEnumerable<Tuple<string, string>> content)
         {
             var zipStream = new MemoryStream();
 
-            using (ZipArchive zip = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+            using (var zip = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
             {
                 foreach (var t in content)
                 {
                     var zipEntry = zip.CreateEntry(t.Item2);
                     using (var writer = new StreamWriter(zipEntry.Open()))
                     {
-                        writer.Write(t.Item1);
+                        await writer.WriteAsync(t.Item1);
                     }
-                }
-
-                return zipStream;
+                }              
             }
+
+            var b = zipStream.ToArray();
+            zipStream.Dispose();
+
+            return b;
         }
     }
 }
