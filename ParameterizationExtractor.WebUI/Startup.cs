@@ -9,6 +9,7 @@ using Quipu.ParameterizationExtractor.Logic.Model;
 using Microsoft.Extensions.Configuration;
 using ParameterizationExtractor.WebUI.DataAccess;
 using ParameterizationExtractor.Logic.MSSQL;
+using ParameterizationExtractor.WebUI.Middlewares;
 
 namespace ParameterizationExtractor.WebUI
 {
@@ -63,6 +64,8 @@ namespace ParameterizationExtractor.WebUI
             app.UseStaticFiles();
             
             loggerFactory.AddConsole();
+
+            app.UseImpersonation();
 
             app.UseMvc(routes =>
             {

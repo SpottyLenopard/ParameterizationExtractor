@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Quipu.ParameterizationExtractor.Common;
 using Quipu.ParameterizationExtractor.Logic.Configs;
@@ -33,6 +34,7 @@ namespace ParameterizationExtractor.WebUI.Api
         }
         
         [HttpPost]
+        [Authorize]
         [Route("[Controller]/Execute")]
         public async Task<IActionResult> ExecuteAsync(CancellationToken token, [FromBody]Package pckg)
         {
