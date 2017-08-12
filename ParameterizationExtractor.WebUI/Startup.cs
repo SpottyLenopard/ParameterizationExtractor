@@ -60,10 +60,20 @@ namespace ParameterizationExtractor.WebUI
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             // order matters
+            app.UseCustomErrorHandling();
             app.UseDefaultFiles();
             app.UseStaticFiles();
             
             loggerFactory.AddConsole();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {              
+                app.UseDeveloperExceptionPage();
+            }
 
             app.UseImpersonation();
 
@@ -73,11 +83,6 @@ namespace ParameterizationExtractor.WebUI
                     name: "default",
                     template: "{controller}/{action}");
             });
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
 
             //app.Run(async (context) =>
             //{

@@ -5,4 +5,4 @@
     selector: 'header-templ',
     templateUrl: 'header.component.html'
 })
-export class HeaderComponent { AppName = 'Excavator tool';  }
+export class HeaderComponent { AppName = 'Buldozer tool';  }

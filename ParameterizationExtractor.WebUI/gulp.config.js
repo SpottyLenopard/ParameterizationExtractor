@@ -22,6 +22,7 @@ module.exports = {
             "node_modules/angular2-toaster/lib/toaster.css",
             "node_modules/ng2-slim-loading-bar/style.css",
             "./css/custom.css",
+            "./content/css/app.css",
             "node_modules/angular2-busy/build/style/busy.css"
         ],
         angular: "node_modules/@angular/**/*.*",

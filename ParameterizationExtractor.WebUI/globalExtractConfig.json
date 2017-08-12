@@ -7,8 +7,68 @@
         "UniqueColumns": [ "BPTypeCode", "StepStartStatusId", "StepEndStatusId" ]
       },
       {
+        "TableName": "Presentations",
+        "UniqueColumns": [ "Name", "Code" ]
+      },
+      {
+        "TableName": "FlowDefinitions",
+        "UniqueColumns": [ "Code" ]
+      },
+      {
+        "TableName": "Scripts",
+        "UniqueColumns": [ "Code" ]
+      },
+      {
         "TableName": "bpProcessingConditions",
         "UniqueColumns": [ "ConditionText" ]
+      },
+      {
+        "TableName": "PaymentMessageContent",
+        "UniqueColumns": [ "Code" ]
+      },
+      {
+        "TableName": "BpTypeDefaultExecutionParameters",
+        "UniqueColumns": [ "ParameterName", "BPTypeCode" ]
+      },
+      {
+        "TableName": "BPAttrTypes",
+        "UniqueColumns": [ "Code" ]
+      },
+      {
+        "TableName": "sys_Parameters",
+        "UniqueColumns": [ "ParameterName" ]
+      },
+      {
+        "TableName": "Cls_PaymentMessageTypes",
+        "UniqueColumns": [ "Code" ]
+      },
+      {
+        "TableName": "PaymentMessageTypeFields",
+        "UniqueColumns": [ "Code" ]
+      },
+      {
+        "TableName": "ServiceJobs",
+        "UniqueColumns": [ "Title", "Description" ]
+      },
+      {
+        "TableName": "ServiceJobItems",
+        "UniqueColumns": [ "MethodName", "ObjectAssemblyName", "ObjectTypeName" ]
+      },
+      {
+        "TableName": "Cls_ScriptTypes",
+        "UniqueColumns": [ "Code" ]
+      },
+      {
+        "TableName": "MessageQueueHandlers",
+        "UniqueColumns": [ "TableName", "Assembly", "Method" ]
+      },
+      {
+        "TableName": "Subscribers",
+        "UniqueColumns": [ "Code" ]
+      },
+      {
+        "TableName": "PresentationValidationRules",
+        "UniqueColumns": [ "ViewModelProperty", "ValidationType", "PresentationID" ]
       }
     ],
     "DefaultExtractStrategy": {
