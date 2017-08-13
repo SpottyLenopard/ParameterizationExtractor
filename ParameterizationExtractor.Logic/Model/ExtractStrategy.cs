@@ -12,14 +12,17 @@ namespace Quipu.ParameterizationExtractor.Logic.Model
     [XmlInclude(typeof(OnlyParentExtractStrategy))]
     [XmlInclude(typeof(OnlyChildrenExtractStrategy))]
     [XmlInclude(typeof(OnlyOneTableExtractStrategy))]
-    public abstract class ExtractStrategy
+    public class ExtractStrategy
     {
-        protected ExtractStrategy(bool processChildren, bool processParents) : this(processChildren, processParents, new List<string>())
+        public ExtractStrategy() {
+            DependencyToExclude = new List<string>();
+        }
+        public ExtractStrategy(bool processChildren, bool processParents) : this(processChildren, processParents, new List<string>())
         {
         }
 
 
-        protected ExtractStrategy(bool processChildren, bool processParents, List<string> dependencyToExclue)
+        public ExtractStrategy(bool processChildren, bool processParents, List<string> dependencyToExclue)
         {
             ProcessChildren = processChildren;
             ProcessParents = processParents;

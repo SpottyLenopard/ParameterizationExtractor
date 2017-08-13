@@ -38,31 +38,38 @@ namespace ParameterizationExtractor.WebUI.Api
         [Route("[Controller]/Execute")]
         public async Task<IActionResult> ExecuteAsync(CancellationToken token, [FromBody]Package pckg)
         {
-            await _schema.Init(token);
-
-            _log.Debug("Starting processing of package...");          
-            var tasks = new List<Task<Tuple<string,string>>>();
-
-            foreach (var scriptSource in pckg.Scripts)
+            try
             {
-                tasks.Add(Task.Run(async () =>
+                await _schema.Init(token);
+
+                _log.Debug("Starting processing of package...");
+                var tasks = new List<Task<Tuple<string, string>>>();
+
+                foreach (var scriptSource in pckg.Scripts)
                 {
-                    var pTables = await _dependencyBuilder.PrepareAsync(token, scriptSource);
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        var pTables = await _dependencyBuilder.PrepareAsync(token, scriptSource);
 
-                    return new Tuple<string, string>(_sqlBuilder.Build(pTables, _schema), "{0}_p_{1}.sql".FormIt(scriptSource.Order, scriptSource.ScriptName));
+                        return new Tuple<string, string>(_sqlBuilder.Build(pTables, _schema), "{0}_p_{1}.sql".FormIt(scriptSource.Order, scriptSource.ScriptName));
 
-                }));
+                    }));
 
+                }
+
+                await Task.WhenAll(tasks);
+
+                _log.Debug("Finished processing of package.");
+
+                return new FileContentResult(await PrepareStream(tasks.Select(_ => _.Result)), new MediaTypeHeaderValue("application/zip"))
+                {
+                    FileDownloadName = "scripts.zip"
+                };
             }
-
-            await Task.WhenAll(tasks);
-
-            _log.Debug("Finished processing of package.");
-
-            return new FileContentResult(await PrepareStream(tasks.Select(_ => _.Result)), new MediaTypeHeaderValue("application/zip"))
+            catch (Exception e)
             {
-                FileDownloadName = "scripts.zip"
-            };
+                throw e;
+            }
         }
 
         private async Task<byte[]> PrepareStream(IEnumerable<Tuple<string, string>> content)
